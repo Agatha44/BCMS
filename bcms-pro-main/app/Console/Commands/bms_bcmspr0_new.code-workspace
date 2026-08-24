@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "../../../../../StudioProjects/bms_roadside_pos_new"
+		},
+		{
+			"path": "../../.."
+		},
+		{
+			"path": "../../../../../WebstormProjects/bms-frontend"
+		}
+	],
+	"settings": {
+		"java.configuration.updateBuildConfiguration": "automatic"
+	}
+}

@@ -1,0 +1,728 @@
+/* ================================================================
+   BMS Theme Tokens — light / dark CSS variables
+   Applied via class on <html> by ThemeContext
+   ================================================================ */
+:root {
+  --bms-bg-page: #f9fafb;
+  --bms-bg-surface: #ffffff;
+  --bms-bg-elevated: #ffffff;
+  --bms-bg-muted: #f1f5f9;
+  --bms-bg-subtle: #f8fafc;
+  --bms-border: #e2e8f0;
+  --bms-border-strong: #cbd5e1;
+  --bms-text: #0f172a;
+  --bms-text-secondary: #475569;
+  --bms-text-muted: #64748b;
+  --bms-brand-soft: #fff5f5;
+  --bms-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  --bms-on-brand: #ffffff;
+  --bms-on-brand-muted: rgba(255, 255, 255, 0.8);
+}
+
+html.dark {
+  color-scheme: dark;
+
+  --bms-bg-page: #0b1120;
+  --bms-bg-surface: #111827;
+  --bms-bg-elevated: #1f2937;
+  --bms-bg-muted: #1a2332;
+  --bms-bg-subtle: #0f172a;
+  --bms-border: #374151;
+  --bms-border-strong: #4b5563;
+  --bms-text: #e5e7eb;
+  --bms-text-secondary: #cbd5e1;
+  --bms-text-muted: #9ca3af;
+  --bms-brand-soft: rgba(150, 46, 50, 0.22);
+  --bms-shadow: 0 2px 16px rgba(0, 0, 0, 0.45);
+  --bms-on-brand: #f3f4f6;
+  --bms-on-brand-muted: rgba(243, 244, 246, 0.75);
+}
+
+html.dark body {
+  background-color: var(--bms-bg-page);
+  color: var(--bms-text);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* ---- Ant Design global dark refinements ---- */
+html.dark .ant-card {
+  background: var(--bms-bg-surface);
+  border-color: var(--bms-border);
+}
+
+html.dark .ant-card-head {
+  border-bottom-color: var(--bms-border);
+  color: var(--bms-text);
+}
+
+html.dark .ant-table {
+  background: var(--bms-bg-surface);
+  color: var(--bms-text);
+}
+
+html.dark .ant-table-tbody > tr > td {
+  border-bottom-color: var(--bms-border) !important;
+}
+
+html.dark .ant-table-tbody > tr > td:not(:last-child) {
+  border-right-color: var(--bms-border) !important;
+}
+
+html.dark .ant-modal-content,
+html.dark .ant-drawer-content,
+html.dark .ant-dropdown-menu,
+html.dark .ant-select-dropdown,
+html.dark .ant-picker-panel-container {
+  background: var(--bms-bg-elevated);
+}
+
+html.dark .ant-form-item-label > label {
+  color: var(--bms-text-secondary);
+}
+
+html.dark .ant-empty-description {
+  color: var(--bms-text-muted);
+}
+
+html.dark .ant-statistic-title {
+  color: var(--bms-text-muted);
+}
+
+html.dark .ant-statistic-content {
+  color: var(--bms-text);
+}
+
+html.dark .ant-tabs-tab {
+  color: var(--bms-text-muted);
+}
+
+html.dark .ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: #f29ea1;
+}
+
+html.dark .ant-tag-blue {
+  color: #f29ea1 !important;
+  background: var(--bms-brand-soft) !important;
+  border-color: rgba(150, 46, 50, 0.35) !important;
+}
+
+html.dark .ant-tag-blue-inverse {
+  color: var(--bms-on-brand) !important;
+  background: #962e32 !important;
+  border-color: #962e32 !important;
+}
+
+/* ---- DataTable dark mode ---- */
+html.dark .data-table-wrapper .ant-table-tbody > tr > td {
+  border-bottom-color: var(--bms-border) !important;
+  color: var(--bms-text);
+}
+
+html.dark .data-table-wrapper .ant-table-tbody > tr > td:not(:last-child) {
+  border-right-color: var(--bms-border) !important;
+}
+
+html.dark .data-table-wrapper .ant-table-tbody > tr:hover > td {
+  background-color: var(--bms-brand-soft) !important;
+}
+
+html.dark .data-table-wrapper .ant-table-pagination.ant-pagination {
+  border-top-color: var(--bms-border);
+}
+
+html.dark .data-table-wrapper .ant-pagination .ant-pagination-item,
+html.dark .data-table-wrapper .ant-pagination .ant-pagination-prev .ant-pagination-item-link,
+html.dark .data-table-wrapper .ant-pagination .ant-pagination-next .ant-pagination-item-link,
+html.dark .data-table-wrapper .ant-pagination .ant-pagination-jump-prev,
+html.dark .data-table-wrapper .ant-pagination .ant-pagination-jump-next {
+  border-color: var(--bms-border) !important;
+  color: var(--bms-text-secondary) !important;
+  background: var(--bms-bg-muted) !important;
+}
+
+html.dark .data-table-wrapper .ant-pagination .ant-pagination-item:hover,
+html.dark .data-table-wrapper .ant-pagination .ant-pagination-prev:hover .ant-pagination-item-link,
+html.dark .data-table-wrapper .ant-pagination .ant-pagination-next:hover .ant-pagination-item-link {
+  background: var(--bms-brand-soft) !important;
+}
+
+html.dark .data-table-wrapper .ant-pagination .ant-pagination-disabled .ant-pagination-item-link {
+  background: var(--bms-bg-subtle) !important;
+  color: var(--bms-text-muted) !important;
+}
+
+html.dark .data-table-wrapper .ant-pagination-options .ant-select-selector {
+  border-color: var(--bms-border) !important;
+  background: var(--bms-bg-muted) !important;
+}
+
+/* ---- Sidebar (dark mode only — light uses original Tailwind classes) ---- */
+html.dark .bms-sidebar-root > aside,
+html.dark .bms-sidebar-root > section {
+  background: var(--bms-bg-surface) !important;
+  border-color: var(--bms-border) !important;
+}
+
+html.dark .bms-sidebar-root .border-slate-200 {
+  border-color: rgba(51, 65, 85, 0.8) !important;
+}
+
+html.dark .bms-sidebar-root input[type='text'] {
+  background-color: var(--bms-bg-muted) !important;
+  border-color: var(--bms-border) !important;
+  color: var(--bms-text) !important;
+}
+
+html.dark .bms-sidebar-root input[type='text']::placeholder {
+  color: var(--bms-text-muted);
+}
+
+html.dark .bms-sidebar-root input[type='text']:focus {
+  background-color: var(--bms-bg-surface) !important;
+}
+
+html.dark .bms-sidebar-root .bg-gray-50 {
+  background-color: var(--bms-bg-muted) !important;
+  color: var(--bms-text) !important;
+}
+
+html.dark .bms-sidebar-root .bg-white {
+  background-color: var(--bms-bg-elevated) !important;
+}
+
+html.dark .bms-sidebar-root .text-gray-600,
+html.dark .bms-sidebar-root .text-gray-700,
+html.dark .bms-sidebar-root .text-gray-900 {
+  color: var(--bms-text) !important;
+}
+
+html.dark .bms-sidebar-root .text-slate-400,
+html.dark .bms-sidebar-root .text-slate-500,
+html.dark .bms-sidebar-root .text-slate-600,
+html.dark .bms-sidebar-root .text-slate-700 {
+  color: var(--bms-text-secondary) !important;
+}
+
+html.dark .bms-sidebar-root .hover\:bg-slate-50:hover,
+html.dark .bms-sidebar-root .hover\:bg-slate-100:hover {
+  background-color: rgba(30, 41, 59, 0.8) !important;
+  color: var(--bms-text) !important;
+}
+
+html.dark .bms-sidebar-root [class*='fff5f5'] {
+  background-color: var(--bms-brand-soft) !important;
+  color: #f29ea1 !important;
+}
+
+html.dark .bms-sidebar-root [class*='fff5f5'] .text-\[\#962E32\] {
+  color: #f29ea1 !important;
+}
+
+html.dark .bms-sidebar-root .bg-slate-100 {
+  background-color: var(--bms-bg-muted) !important;
+}
+
+html.dark .bms-sidebar-root .bg-slate-200 {
+  background-color: rgba(51, 65, 85, 0.6) !important;
+}
+
+html.dark .bms-sidebar-root .border-gray-200 {
+  border-color: var(--bms-border) !important;
+}
+
+html.dark .bms-breadcrumb {
+  background-color: var(--bms-bg-surface) !important;
+  border: 1px solid var(--bms-border);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25) !important;
+}
+
+html.dark .bms-breadcrumb .bms-breadcrumb-home {
+  color: var(--bms-text-muted) !important;
+}
+
+html.dark .bms-breadcrumb .bms-breadcrumb-home:hover {
+  color: #f29ea1 !important;
+}
+
+html.dark .bms-breadcrumb .bms-breadcrumb-separator {
+  color: var(--bms-border-strong) !important;
+}
+
+html.dark .bms-breadcrumb .bms-breadcrumb-current {
+  color: var(--bms-text) !important;
+}
+
+html.dark .bms-breadcrumb .bms-breadcrumb-link {
+  color: var(--bms-text-secondary) !important;
+}
+
+html.dark .bms-breadcrumb .bms-breadcrumb-link:hover {
+  color: #f29ea1 !important;
+}
+
+/* Common Tailwind surface helpers used across pages */
+html.dark .bg-gray-50 {
+  background-color: var(--bms-bg-page) !important;
+}
+
+html.dark .bg-white {
+  background-color: var(--bms-bg-surface) !important;
+}
+
+html.dark .text-gray-900,
+html.dark .text-gray-800,
+html.dark .text-gray-700 {
+  color: var(--bms-text) !important;
+}
+
+html.dark .text-gray-600,
+html.dark .text-gray-500 {
+  color: var(--bms-text-secondary) !important;
+}
+
+html.dark .border-gray-200,
+html.dark .border-gray-100 {
+  border-color: var(--bms-border) !important;
+}
+
+html.dark .divide-gray-200 > :not([hidden]) ~ :not([hidden]) {
+  border-color: var(--bms-border);
+}
+
+html.dark .shadow,
+html.dark .shadow-sm,
+html.dark .shadow-md {
+  box-shadow: var(--bms-shadow) !important;
+}
+
+/* ================================================================
+   Dark mode — replace white / near-white surfaces globally
+   Preserves light text only on brand bars (#902d30, #962E32, #f9c000)
+   ================================================================ */
+
+html.dark .bg-white,
+html.dark .bg-white\/95,
+html.dark .bg-white\/90,
+html.dark .bg-white\/80,
+html.dark .bg-white\/70 {
+  background-color: var(--bms-bg-surface) !important;
+}
+
+html.dark .bg-slate-50,
+html.dark .bg-slate-100,
+html.dark .bg-gray-50,
+html.dark .bg-gray-100,
+html.dark .bg-neutral-50 {
+  background-color: var(--bms-bg-muted) !important;
+}
+
+html.dark .hover\:bg-slate-50:hover,
+html.dark .hover\:bg-slate-100:hover,
+html.dark .hover\:bg-gray-50:hover,
+html.dark .hover\:bg-gray-100:hover,
+html.dark .hover\:\!bg-\[\#fff5f5\]:hover {
+  background-color: var(--bms-bg-muted) !important;
+}
+
+html.dark [class*='fff5f5'] {
+  background-color: var(--bms-brand-soft) !important;
+}
+
+html.dark .border-white,
+html.dark .border-white\/80,
+html.dark .border-white\/30 {
+  border-color: var(--bms-border) !important;
+}
+
+html.dark .border-slate-100,
+html.dark .border-slate-200,
+html.dark .border-slate-300,
+html.dark .border-gray-100,
+html.dark .border-gray-200,
+html.dark .border-gray-300 {
+  border-color: var(--bms-border) !important;
+}
+
+html.dark .ring-white\/30,
+html.dark .ring-slate-100,
+html.dark .ring-slate-100\/50 {
+  --tw-ring-color: rgba(75, 85, 99, 0.55) !important;
+}
+
+html.dark .text-black {
+  color: var(--bms-text) !important;
+}
+
+html.dark .text-slate-700,
+html.dark .text-slate-800,
+html.dark .text-slate-900 {
+  color: var(--bms-text) !important;
+}
+
+html.dark .text-slate-600,
+html.dark .text-slate-500,
+html.dark .text-slate-400 {
+  color: var(--bms-text-secondary) !important;
+}
+
+html.dark .divide-slate-200 > :not([hidden]) ~ :not([hidden]),
+html.dark .divide-gray-200 > :not([hidden]) ~ :not([hidden]) {
+  border-color: var(--bms-border);
+}
+
+/* Modal / drawer footers and panels using bg-white */
+html.dark .border-t.bg-white,
+html.dark .border-t.border-slate-200.bg-white,
+html.dark div.border-t[class*='bg-white'] {
+  background-color: var(--bms-bg-surface) !important;
+  border-top-color: var(--bms-border) !important;
+}
+
+/* Ant Design — inputs, pickers, dropdowns */
+html.dark .ant-input,
+html.dark .ant-input-affix-wrapper,
+html.dark .ant-input-number,
+html.dark .ant-input-number-affix-wrapper,
+html.dark .ant-select-selector,
+html.dark .ant-picker,
+html.dark .ant-picker-input > input {
+  background-color: var(--bms-bg-muted) !important;
+  border-color: var(--bms-border) !important;
+  color: var(--bms-text) !important;
+}
+
+html.dark .ant-input-affix-wrapper .ant-input {
+  background-color: transparent !important;
+}
+
+html.dark .ant-input::placeholder,
+html.dark .ant-picker-input > input::placeholder,
+html.dark .ant-select-selection-placeholder {
+  color: var(--bms-text-muted) !important;
+}
+
+html.dark .ant-select-dropdown,
+html.dark .ant-dropdown-menu,
+html.dark .ant-dropdown-menu-item,
+html.dark .ant-select-item {
+  background-color: var(--bms-bg-elevated) !important;
+  color: var(--bms-text) !important;
+}
+
+html.dark .ant-select-item-option-active:not(.ant-select-item-option-disabled),
+html.dark .ant-dropdown-menu-item:hover {
+  background-color: var(--bms-brand-soft) !important;
+}
+
+html.dark .ant-modal-content,
+html.dark .ant-modal-body,
+html.dark .ant-modal-footer,
+html.dark .ant-drawer-content,
+html.dark .ant-drawer-header,
+html.dark .ant-drawer-body,
+html.dark .ant-drawer-footer {
+  background-color: var(--bms-bg-elevated) !important;
+  color: var(--bms-text);
+}
+
+html.dark .ant-modal-footer,
+html.dark .ant-drawer-footer {
+  border-top-color: var(--bms-border) !important;
+}
+
+html.dark .ant-drawer-header {
+  border-bottom-color: var(--bms-border) !important;
+}
+
+html.dark .ant-popover-inner,
+html.dark .ant-tooltip-inner {
+  background-color: var(--bms-bg-elevated) !important;
+  color: var(--bms-text) !important;
+}
+
+html.dark .ant-segmented {
+  background-color: var(--bms-bg-muted) !important;
+}
+
+html.dark .ant-segmented-item-selected {
+  background-color: var(--bms-bg-elevated) !important;
+  color: var(--bms-text) !important;
+}
+
+html.dark .ant-btn-default {
+  background-color: var(--bms-bg-muted) !important;
+  border-color: var(--bms-border) !important;
+  color: var(--bms-text) !important;
+}
+
+html.dark .ant-btn-default:hover {
+  background-color: var(--bms-brand-soft) !important;
+  border-color: #962e32 !important;
+  color: #f29ea1 !important;
+}
+
+html.dark .ant-table-wrapper,
+html.dark .ant-table-container,
+html.dark .ant-table-content {
+  background-color: var(--bms-bg-surface) !important;
+}
+
+html.dark .ant-table-tbody > tr.ant-table-placeholder:hover > td,
+html.dark .ant-table-tbody > tr > td.ant-table-cell-row-hover {
+  background-color: var(--bms-brand-soft) !important;
+}
+
+html.dark .ant-table-cell-fix-left,
+html.dark .ant-table-cell-fix-right {
+  background-color: var(--bms-bg-surface) !important;
+}
+
+html.dark .ant-pagination-item-active {
+  background-color: #962e32 !important;
+  border-color: #962e32 !important;
+}
+
+html.dark .ant-pagination-item-active a {
+  color: var(--bms-on-brand) !important;
+}
+
+html.dark .ant-tabs-nav::before {
+  border-bottom-color: var(--bms-border) !important;
+}
+
+html.dark .ant-collapse,
+html.dark .ant-collapse-item,
+html.dark .ant-collapse-content {
+  background-color: var(--bms-bg-surface) !important;
+  border-color: var(--bms-border) !important;
+}
+
+html.dark .ant-list-item {
+  border-bottom-color: var(--bms-border) !important;
+}
+
+html.dark .ant-descriptions-item-label,
+html.dark .ant-descriptions-item-content {
+  background-color: var(--bms-bg-muted) !important;
+  color: var(--bms-text) !important;
+  border-color: var(--bms-border) !important;
+}
+
+html.dark .ant-checkbox-inner,
+html.dark .ant-radio-inner {
+  background-color: var(--bms-bg-muted) !important;
+  border-color: var(--bms-border-strong) !important;
+}
+
+html.dark .ant-upload.ant-upload-drag {
+  background-color: var(--bms-bg-muted) !important;
+  border-color: var(--bms-border) !important;
+}
+
+html.dark .ant-upload.ant-upload-drag:hover {
+  border-color: #962e32 !important;
+}
+
+/* Brand modal body (header stays burgundy) */
+html.dark .brand-modal .ant-modal-body {
+  background-color: var(--bms-bg-elevated) !important;
+  color: var(--bms-text);
+}
+
+/* ================================================================
+   Modals & drawers — comprehensive dark mode (no white surfaces)
+   ================================================================ */
+
+html.dark .ant-modal-root .ant-modal-content,
+html.dark .ant-modal-root .ant-modal-body,
+html.dark .ant-modal-root .ant-modal-footer {
+  background-color: var(--bms-bg-elevated) !important;
+  color: var(--bms-text) !important;
+}
+
+html.dark .ant-modal-root .ant-modal-header {
+  background-color: var(--bms-bg-elevated) !important;
+  border-bottom-color: var(--bms-border) !important;
+}
+
+html.dark .ant-modal-root .ant-modal-title {
+  color: var(--bms-text) !important;
+}
+
+html.dark .ant-modal-root .ant-modal-close {
+  color: var(--bms-text-secondary) !important;
+}
+
+html.dark .ant-modal-root .ant-modal-close:hover {
+  color: var(--bms-text) !important;
+  background-color: var(--bms-bg-muted) !important;
+}
+
+html.dark .ant-modal-root .ant-modal-footer {
+  border-top-color: var(--bms-border) !important;
+}
+
+/* Confirm / info / warning modals */
+html.dark .ant-modal-confirm .ant-modal-content,
+html.dark .ant-modal-confirm .ant-modal-body {
+  background-color: var(--bms-bg-elevated) !important;
+}
+
+html.dark .ant-modal-confirm-title {
+  color: var(--bms-text) !important;
+}
+
+html.dark .ant-modal-confirm-content,
+html.dark .ant-modal-confirm-body {
+  color: var(--bms-text-secondary) !important;
+}
+
+html.dark .ant-modal-confirm-body .anticon {
+  color: inherit;
+}
+
+/* All surfaces inside open modals */
+html.dark .ant-modal-body .bg-white,
+html.dark .ant-modal-body .bg-white\/95,
+html.dark .ant-modal-body .bg-white\/90,
+html.dark .ant-modal-body .bg-white\/80,
+html.dark .ant-modal-body .bg-white\/70,
+html.dark .ant-modal-content .bg-white,
+html.dark .ant-modal-content .bg-white\/70 {
+  background-color: var(--bms-bg-surface) !important;
+}
+
+html.dark .ant-modal-body .bg-white\/70,
+html.dark .ant-modal-content .bg-white\/70 {
+  background-color: rgba(17, 24, 39, 0.82) !important;
+}
+
+html.dark .ant-modal-body .bg-slate-50,
+html.dark .ant-modal-body .bg-gray-50,
+html.dark .ant-modal-body .bg-slate-100 {
+  background-color: var(--bms-bg-muted) !important;
+}
+
+html.dark .ant-modal-body .border-slate-200,
+html.dark .ant-modal-body .border-slate-100,
+html.dark .ant-modal-body .border-gray-200,
+html.dark .ant-modal-body .border-gray-300 {
+  border-color: var(--bms-border) !important;
+}
+
+html.dark .ant-modal-body .text-black,
+html.dark .ant-modal-body .text-slate-900,
+html.dark .ant-modal-body .text-slate-800,
+html.dark .ant-modal-body .text-slate-700,
+html.dark .ant-modal-body .text-gray-900,
+html.dark .ant-modal-body .text-gray-800,
+html.dark .ant-modal-body .text-gray-700 {
+  color: var(--bms-text) !important;
+}
+
+html.dark .ant-modal-body .text-slate-600,
+html.dark .ant-modal-body .text-slate-500,
+html.dark .ant-modal-body .text-gray-600,
+html.dark .ant-modal-body .text-gray-500 {
+  color: var(--bms-text-secondary) !important;
+}
+
+html.dark .ant-modal-body .text-slate-400,
+html.dark .ant-modal-body .text-gray-400 {
+  color: var(--bms-text-muted) !important;
+}
+
+/* Custom modal footers (border-t bg-white px-6 py-3 pattern) */
+html.dark .ant-modal-body .border-t,
+html.dark .ant-modal-content .border-t.border-slate-200 {
+  border-top-color: var(--bms-border) !important;
+}
+
+html.dark .ant-modal-body div[class*='border-t'][class*='bg-white'],
+html.dark .ant-modal-body > div > div.border-t.bg-white,
+html.dark .ant-modal-body .border-t.bg-white {
+  background-color: var(--bms-bg-surface) !important;
+}
+
+/* Burgundy custom modal header bars used across detail/form modals */
+html.dark .ant-modal-body .bg-\[\#962E32\],
+html.dark .ant-modal-content .bg-\[\#962E32\] {
+  color: var(--bms-on-brand) !important;
+}
+
+html.dark .ant-modal-body .bg-\[\#962E32\] .text-white,
+html.dark .ant-modal-body .bg-\[\#962E32\].text-white,
+html.dark .ant-modal-body .bg-\[\#962E32\] h2,
+html.dark .ant-modal-body .bg-\[\#962E32\] button {
+  color: var(--bms-on-brand) !important;
+}
+
+html.dark .ant-modal-body .bg-\[\#962E32\] button:hover {
+  background-color: rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Drawers */
+html.dark .ant-drawer .ant-drawer-content,
+html.dark .ant-drawer .ant-drawer-header,
+html.dark .ant-drawer .ant-drawer-body,
+html.dark .ant-drawer .ant-drawer-footer {
+  background-color: var(--bms-bg-elevated) !important;
+  color: var(--bms-text) !important;
+}
+
+html.dark .ant-drawer .ant-drawer-header {
+  border-bottom-color: var(--bms-border) !important;
+}
+
+html.dark .ant-drawer .ant-drawer-title {
+  color: var(--bms-text) !important;
+}
+
+html.dark .ant-drawer .ant-drawer-footer {
+  border-top-color: var(--bms-border) !important;
+}
+
+html.dark .ant-drawer-body .bg-white,
+html.dark .ant-drawer-body .bg-gray-50,
+html.dark .ant-drawer-body .bg-slate-50 {
+  background-color: var(--bms-bg-surface) !important;
+}
+
+/* Popconfirm / popover attached to modal actions */
+html.dark .ant-popover .ant-popover-inner {
+  background-color: var(--bms-bg-elevated) !important;
+  color: var(--bms-text) !important;
+}
+
+html.dark .ant-popover .ant-popover-title {
+  color: var(--bms-text) !important;
+  border-bottom-color: var(--bms-border) !important;
+}
+
+html.dark .ant-popover .ant-popover-inner-content {
+  color: var(--bms-text-secondary) !important;
+}
+
+html.dark .ant-popover .ant-popover-arrow::before {
+  background-color: var(--bms-bg-elevated) !important;
+}
+
+/* Scrollbars inside modals */
+html.dark .ant-modal-body::-webkit-scrollbar-thumb,
+html.dark .ant-drawer-body::-webkit-scrollbar-thumb {
+  background-color: #4b5563;
+}
+
+html.dark .ant-modal-body::-webkit-scrollbar-track,
+html.dark .ant-drawer-body::-webkit-scrollbar-track {
+  background-color: var(--bms-bg-subtle);
+}
+
+/* Scrollbars */
+html.dark ::-webkit-scrollbar-thumb {
+  background-color: #4b5563;
+}
+
+html.dark ::-webkit-scrollbar-track {
+  background-color: var(--bms-bg-subtle);
+}

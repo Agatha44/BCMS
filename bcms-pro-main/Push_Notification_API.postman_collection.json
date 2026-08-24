@@ -1,0 +1,445 @@
+{
+	"info": {
+		"_postman_id": "push-notification-api-collection",
+		"name": "NSSF Push Notification API",
+		"description": "Complete Postman collection for NSSF Push Notification API endpoints using Firebase Cloud Messaging HTTP v1 API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "nssf-push-notifications"
+	},
+	"item": [
+		{
+			"name": "1. Register FCM Token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 or 201\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+							"});",
+							"",
+							"pm.test(\"Response has success field\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('success');",
+							"});",
+							"",
+							"pm.test(\"FCM token registered successfully\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    if (jsonData.success) {",
+							"        pm.expect(jsonData.data).to.have.property('fcm_token_registered');",
+							"        pm.expect(jsonData.data.fcm_token_registered).to.be.true;",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{bearer_token}}",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"fcm_token\": \"{{fcm_token}}\",\n    \"device_type\": \"android\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/api/nssf-app/register-push-token",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"nssf-app",
+						"register-push-token"
+					]
+				},
+				"description": "Registers or updates the FCM token for the authenticated user. This is called automatically by the mobile app when a user logs in.\n\n**Note:** Replace `{{fcm_token}}` with an actual FCM token from the mobile app."
+			},
+			"response": []
+		},
+		{
+			"name": "2. Unregister FCM Token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.expect(pm.response.code).to.equal(200);",
+							"});",
+							"",
+							"pm.test(\"FCM token unregistered successfully\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    if (jsonData.success) {",
+							"        pm.expect(jsonData.data).to.have.property('fcm_token_unregistered');",
+							"        pm.expect(jsonData.data.fcm_token_unregistered).to.be.true;",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{bearer_token}}",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/nssf-app/unregister-push-token",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"nssf-app",
+						"unregister-push-token"
+					]
+				},
+				"description": "Removes the FCM token when user logs out. No request body required."
+			},
+			"response": []
+		},
+		{
+			"name": "3. Send Notification (Single User)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.expect(pm.response.code).to.equal(200);",
+							"});",
+							"",
+							"pm.test(\"Notification sent successfully\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    if (jsonData.success) {",
+							"        pm.expect(jsonData.data).to.have.property('notification_sent');",
+							"        pm.expect(jsonData.data.notification_sent).to.be.true;",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{bearer_token}}",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"user_id\": {{user_id}},\n    \"title\": \"New Bill Available\",\n    \"body\": \"You have a new contribution bill of TZS 50,000\",\n    \"type\": \"bill\",\n    \"route\": \"/member-service\",\n    \"data\": {\n        \"bill_id\": \"12345\",\n        \"amount\": \"50000\",\n        \"due_date\": \"2025-02-15\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/api/nssf-app/send-notification",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"nssf-app",
+						"send-notification"
+					]
+				},
+				"description": "Sends a push notification to a specific user.\n\n**Required Parameters:**\n- `user_id`: The ID of the user to send notification to\n- `title`: Notification title (max 255 characters)\n- `body`: Notification body text\n\n**Optional Parameters:**\n- `type`: Notification type (e.g., \"bill\", \"payment\", \"contribution\", \"benefit\", \"query\", \"bridge\", \"pensioner\")\n- `route`: Route to navigate to when notification is tapped\n- `data`: Additional data to send with notification (key-value pairs, all values must be strings)"
+			},
+			"response": []
+		},
+		{
+			"name": "4. Send Bulk Notifications",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.expect(pm.response.code).to.equal(200);",
+							"});",
+							"",
+							"pm.test(\"Bulk notification response has results\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    if (jsonData.success) {",
+							"        pm.expect(jsonData.data).to.have.property('total_users');",
+							"        pm.expect(jsonData.data).to.have.property('success_count');",
+							"        pm.expect(jsonData.data).to.have.property('failure_count');",
+							"        pm.expect(jsonData.data).to.have.property('results');",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{bearer_token}}",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"user_ids\": [{{user_id}}, 231632, 231633],\n    \"title\": \"System Maintenance\",\n    \"body\": \"The system will be under maintenance from 2 AM to 4 AM\",\n    \"type\": \"system\",\n    \"route\": \"/subscribed-services\",\n    \"data\": {\n        \"maintenance_start\": \"2025-01-21 02:00:00\",\n        \"maintenance_end\": \"2025-01-21 04:00:00\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/api/nssf-app/send-bulk-notification",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"nssf-app",
+						"send-bulk-notification"
+					]
+				},
+				"description": "Sends push notifications to multiple users at once.\n\n**Required Parameters:**\n- `user_ids`: Array of user IDs to send notifications to\n- `title`: Notification title\n- `body`: Notification body text\n\n**Optional Parameters:**\n- `type`: Notification type\n- `route`: Route to navigate to\n- `data`: Additional data (all values must be strings)"
+			},
+			"response": []
+		},
+		{
+			"name": "Examples",
+			"item": [
+				{
+					"name": "Example: Bill Notification",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{bearer_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_id\": {{user_id}},\n    \"title\": \"New Contribution Bill\",\n    \"body\": \"You have a new contribution bill of TZS 50,000. Due date: 2025-02-15\",\n    \"type\": \"bill\",\n    \"route\": \"/member-service\",\n    \"data\": {\n        \"bill_id\": \"12345\",\n        \"amount\": \"50000\",\n        \"due_date\": \"2025-02-15\",\n        \"period\": \"2025-01\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/nssf-app/send-notification",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"nssf-app",
+								"send-notification"
+							]
+						}
+					}
+				},
+				{
+					"name": "Example: Payment Confirmation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{bearer_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_id\": {{user_id}},\n    \"title\": \"Payment Received\",\n    \"body\": \"Your payment of TZS 50,000 has been processed successfully\",\n    \"type\": \"payment\",\n    \"route\": \"/member-service\",\n    \"data\": {\n        \"payment_id\": \"PAY123456\",\n        \"amount\": \"50000\",\n        \"transaction_date\": \"2025-01-20 14:30:00\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/nssf-app/send-notification",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"nssf-app",
+								"send-notification"
+							]
+						}
+					}
+				},
+				{
+					"name": "Example: Benefit Notification",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{bearer_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_id\": {{user_id}},\n    \"title\": \"Benefit Application Update\",\n    \"body\": \"Your benefit application has been approved\",\n    \"type\": \"benefit\",\n    \"route\": \"/member-service\",\n    \"data\": {\n        \"benefit_id\": \"BEN123456\",\n        \"status\": \"approved\",\n        \"amount\": \"1000000\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/nssf-app/send-notification",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"nssf-app",
+								"send-notification"
+							]
+						}
+					}
+				},
+				{
+					"name": "Example: Bridge Service Notification",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{bearer_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_id\": {{user_id}},\n    \"title\": \"Bridge Account Update\",\n    \"body\": \"Your bridge account balance has been updated\",\n    \"type\": \"bridge\",\n    \"route\": \"/bridge-service\",\n    \"data\": {\n        \"account_id\": \"ACC123456\",\n        \"balance\": \"50000\",\n        \"transaction_type\": \"topup\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/nssf-app/send-notification",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"nssf-app",
+								"send-notification"
+							]
+						}
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000",
+			"type": "string"
+		},
+		{
+			"key": "bearer_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "user_id",
+			"value": "231631",
+			"type": "string"
+		},
+		{
+			"key": "fcm_token",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
+

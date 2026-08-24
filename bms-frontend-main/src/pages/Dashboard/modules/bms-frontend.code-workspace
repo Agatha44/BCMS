@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "../../../.."
+		},
+		{
+			"path": "../../../../../../PhpstormProjects/bcms-pro"
+		},
+		{
+			"path": "../../../../../../PhpstormProjects/bridge-core"
+		},
+		{
+			"path": "../../../../../../PhpstormProjects/bridge-app"
+		}
+	],
+	"settings": {}
+}

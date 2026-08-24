@@ -1,0 +1,182 @@
+@import './styles/theme.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---------------------------------------------------------------
+   Brand red accent overrides
+   The app uses #962E32 as its primary accent. The rules below
+   ensure the browser never falls back to its default blue for
+   focus rings, selection, native form controls (checkbox, radio,
+   range, progress, etc.), or autofill borders.
+   ---------------------------------------------------------------*/
+:root {
+  accent-color: #962E32;
+  caret-color: #962E32;
+}
+
+::selection {
+  background-color: #962E32;
+  color: #ffffff;
+}
+
+::-moz-selection {
+  background-color: #962E32;
+  color: #ffffff;
+}
+
+:focus-visible {
+  outline-color: #962E32;
+}
+
+/* Override antd's blue Tag preset (preset name "blue") so legacy
+   <Tag color="blue"> uses still render in brand burgundy. */
+.ant-tag-blue {
+  color: #962E32 !important;
+  background: #fff5f5 !important;
+  border-color: #f1d7d9 !important;
+}
+.ant-tag-blue-inverse {
+  color: #ffffff !important;
+  background: #962E32 !important;
+  border-color: #962E32 !important;
+}
+
+/* Hide scrollbar for modal */
+.hide-scrollbar-modal .ant-modal-body {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.hide-scrollbar-modal .ant-modal-body::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* ---------------------------------------------------------------
+   Brand modal style: solid burgundy header bar with white title +
+   close button (used on detail / form modals across the app).
+   Add `brand-modal` to a Modal's className to opt in.
+   ---------------------------------------------------------------*/
+.brand-modal .ant-modal-content {
+  padding: 0 !important;
+  overflow: hidden;
+  border-radius: 8px;
+  background-color: #ffffff;
+}
+
+.brand-modal .ant-modal-body {
+  background-color: #ffffff;
+}
+.brand-modal .ant-modal-header {
+  background-color: #962E32 !important;
+  margin: 0 !important;
+  padding: 10px 16px !important;
+  border-bottom: 0 !important;
+  border-radius: 0 !important;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+}
+.brand-modal .ant-modal-title {
+  color: #ffffff !important;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 20px;
+}
+.brand-modal .ant-modal-close {
+  top: 6px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  color: #ffffff !important;
+  border-radius: 4px;
+}
+.brand-modal .ant-modal-close:hover {
+  background-color: rgba(255, 255, 255, 0.18) !important;
+}
+
+html.dark .brand-modal .ant-modal-close:hover {
+  background-color: rgba(0, 0, 0, 0.22) !important;
+}
+
+html.dark .brand-modal .ant-modal-title,
+html.dark .brand-modal .ant-modal-close,
+html.dark .brand-modal .ant-modal-close-x {
+  color: var(--bms-on-brand) !important;
+}
+
+html.dark .brand-modal .ant-modal-content,
+html.dark .brand-modal .ant-modal-body {
+  background-color: var(--bms-bg-elevated) !important;
+  color: var(--bms-text);
+}
+
+/* Light mode — solid opaque modal surfaces (no glass / translucency) */
+html.light .ant-modal-root .ant-modal-content,
+html.light .ant-modal-root .ant-modal-body,
+html.light .ant-modal-root .ant-modal-header,
+html.light .ant-modal-root .ant-modal-footer {
+  background-color: #ffffff !important;
+}
+
+html.light .brand-modal .ant-modal-content,
+html.light .brand-modal .ant-modal-body {
+  background-color: #ffffff !important;
+}
+
+.brand-modal .ant-modal-close-x {
+  color: #ffffff !important;
+  width: 28px;
+  height: 28px;
+  line-height: 28px;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Responsive improvements */
+@media (max-width: 640px) {
+  /* Ensure tables are scrollable on mobile */
+  .ant-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Better spacing on mobile */
+  .ant-form-item {
+    margin-bottom: 16px;
+  }
+  
+  /* Ensure modals don't overflow */
+  .ant-modal {
+    max-width: 95vw !important;
+    margin: 10px auto !important;
+  }
+  
+  /* Better button spacing */
+  .ant-btn {
+    white-space: nowrap;
+  }
+}
+
+/* Tablet optimizations */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .ant-modal {
+    max-width: 90vw !important;
+  }
+}
+
+/* Prevent horizontal scroll on body */
+body {
+  overflow-x: hidden;
+}
+
+/* Ensure proper text wrapping */
+.ant-typography,
+.ant-card-head-title {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}

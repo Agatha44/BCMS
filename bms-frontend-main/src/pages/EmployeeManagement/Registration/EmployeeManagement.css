@@ -1,0 +1,176 @@
+/* Employee Management Styles */
+
+.employee-management-container {
+  width: 100%;
+}
+
+.employee-management-tabs {
+  margin-bottom: 16px;
+}
+
+.employee-management-pending-badge {
+  margin-left: 8px;
+}
+
+.employee-management-register-button {
+  background-color: #962E32;
+  border-color: #962E32;
+}
+
+.employee-management-action-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.employee-management-view-button {
+  background-color: #962E32;
+  border-color: #962E32;
+  color: #fff;
+}
+
+.employee-management-modal {
+  top: 20px;
+}
+
+.employee-management-modal-body {
+  padding: 12px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.employee-management-modal-content {
+  max-height: calc(100vh - 180px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.employee-management-modal-content .ant-row {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.employee-management-modal-content .ant-col {
+  padding-left: 8px !important;
+  padding-right: 8px !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.employee-management-card {
+  margin-bottom: 8px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.employee-management-card-body {
+  padding: 10px;
+}
+
+.employee-management-info-row {
+  margin-bottom: 4px;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.employee-management-label {
+  color: #8c8c8c;
+  font-size: 11px;
+  margin-bottom: 2px;
+}
+
+.employee-management-value {
+  font-size: 13px;
+  font-weight: 500;
+  word-wrap: break-word;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.employee-management-icon {
+  margin-right: 8px;
+}
+
+.employee-management-icon-small {
+  margin-right: 4px;
+}
+
+.employee-management-tag {
+  margin: 0;
+}
+
+.employee-management-history-container {
+  /* Content expands naturally until modal scroll is needed */
+}
+
+.employee-management-history-item {
+  padding: 8px;
+  margin-bottom: 8px;
+  border: 1px solid #f0f0f0;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.employee-management-history-label {
+  color: #8c8c8c;
+}
+
+.employee-management-comment-section {
+  margin-top: 8px;
+  background-color: #fafafa;
+}
+
+.employee-management-comment-body {
+  padding: 12px;
+}
+
+.employee-management-comment-title {
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+
+.employee-management-comment-textarea {
+  margin-bottom: 8px;
+}
+
+.employee-management-comment-hint {
+  font-size: 11px;
+  color: #8c8c8c;
+}
+
+.employee-management-button-primary {
+  background-color: #962E32 !important;
+  border-color: #962E32 !important;
+  color: #fff !important;
+}
+
+.employee-management-button-primary:hover {
+  background-color: #7a2528 !important;
+  border-color: #7a2528 !important;
+}
+
+.employee-management-button-primary:focus {
+  background-color: #962E32 !important;
+  border-color: #962E32 !important;
+}
+
+.employee-management-button-danger {
+  background-color: #962E32 !important;
+  border-color: #962E32 !important;
+  color: #fff !important;
+}
+
+.employee-management-button-danger:hover {
+  background-color: #7a2528 !important;
+  border-color: #7a2528 !important;
+}
+

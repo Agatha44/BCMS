@@ -1,0 +1,197 @@
+{
+	"name": "Post Bill Request",
+	"request": {
+		"method": "POST",
+		"header": [
+			{
+				"key": "Authorization",
+				"value": "Bearer {{auth_token}}"
+			},
+			{
+				"key": "Content-Type",
+				"value": "application/json"
+			}
+		],
+		"body": {
+			"mode": "raw",
+			"raw": "{\n    \"bill_desc\": \"Daily Bundle Subscription\",\n    \"phone\": \"255123456789\",\n    \"account_no\": \"ACC001\",\n    \"vehicle_id\": 1,\n    \"plate_no\": \"T123ABC\",\n    \"bundle_id\": 1\n}"
+		},
+		"url": {
+			"raw": "{{base_url}}/api/post-bill",
+			"host": [
+				"{{base_url}}"
+			],
+			"path": [
+				"api",
+				"post-bill"
+			]
+		},
+		"description": "Create a new bill request for bundle subscriptions. The bill amount is automatically calculated based on the vehicle's body type and bundle type from the price list.\n\n**Parameters:**\n- bill_desc: Description of the bill\n- phone: Phone number of the account holder\n- account_no: Account number (must exist in account table)\n- vehicle_id: Vehicle ID (must exist in vehicle table)\n- plate_no: Vehicle plate number (must match vehicle_id)\n- bundle_id: Bundle type (1=daily, 2=weekly, 3=monthly)\n\n**Note:** The bill_amount is automatically calculated based on the vehicle's body type and bundle type from the price list."
+	},
+	"response": [
+		{
+			"name": "Success Response",
+			"originalRequest": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{auth_token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"bill_desc\": \"Daily Bundle Subscription\",\n    \"phone\": \"255123456789\",\n    \"account_no\": \"ACC001\",\n    \"vehicle_id\": 1,\n    \"plate_no\": \"T123ABC\",\n    \"bundle_id\": 1\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/post-bill",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"post-bill"
+					]
+				}
+			},
+			"status": "OK",
+			"code": 200,
+			"_postman_previewlanguage": "json",
+			"header": [
+				{
+					"key": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"cookie": [],
+			"body": "{\n    \"success\": true,\n    \"message\": \"Control Number Request Successfully Sent\",\n    \"data\": {\n        \"bill_id\": 123,\n        \"bill_amount\": 5000,\n        \"control_number\": \"TBS123456\",\n        \"gepg_response\": {\n            \"status\": \"success\",\n            \"control_number\": \"TBS123456\"\n        }\n    }\n}"
+		},
+		{
+			"name": "Validation Error Response",
+			"originalRequest": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{auth_token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"bill_desc\": \"Daily Bundle Subscription\",\n    \"phone\": \"255123456789\",\n    \"account_no\": \"INVALID_ACCOUNT\",\n    \"vehicle_id\": 1,\n    \"plate_no\": \"T123ABC\",\n    \"bundle_id\": 1\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/post-bill",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"post-bill"
+					]
+				}
+			},
+			"status": "Bad Request",
+			"code": 400,
+			"_postman_previewlanguage": "json",
+			"header": [
+				{
+					"key": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"cookie": [],
+			"body": "{\n    \"success\": false,\n    \"message\": \"Validation Error: The selected account no is invalid.\"\n}"
+		},
+		{
+			"name": "Vehicle Not Found Error",
+			"originalRequest": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{auth_token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"bill_desc\": \"Daily Bundle Subscription\",\n    \"phone\": \"255123456789\",\n    \"account_no\": \"ACC001\",\n    \"vehicle_id\": 999,\n    \"plate_no\": \"T123ABC\",\n    \"bundle_id\": 1\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/post-bill",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"post-bill"
+					]
+				}
+			},
+			"status": "Bad Request",
+			"code": 400,
+			"_postman_previewlanguage": "json",
+			"header": [
+				{
+					"key": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"cookie": [],
+			"body": "{\n    \"success\": false,\n    \"message\": \"Vehicle not found or plate number does not match\"\n}"
+		},
+		{
+			"name": "Outstanding Bill Error",
+			"originalRequest": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{auth_token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"bill_desc\": \"Daily Bundle Subscription\",\n    \"phone\": \"255123456789\",\n    \"account_no\": \"ACC001\",\n    \"vehicle_id\": 1,\n    \"plate_no\": \"T123ABC\",\n    \"bundle_id\": 1\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/post-bill",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"post-bill"
+					]
+				}
+			},
+			"status": "Bad Request",
+			"code": 400,
+			"_postman_previewlanguage": "json",
+			"header": [
+				{
+					"key": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"cookie": [],
+			"body": "{\n    \"success\": false,\n    \"message\": \"You have an outstanding bill with Control Number TBS123456\"\n}"
+		}
+	]
+} 

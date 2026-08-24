@@ -1,0 +1,13 @@
+/* Dashboard Styles */
+
+.dashboard-icon-large {
+  font-size: 64px;
+  color: #962E32;
+  margin-bottom: 16px;
+}
+
+.dashboard-button-primary {
+  background-color: #962E32;
+  border-color: #962E32;
+}
+

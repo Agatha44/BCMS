@@ -1,0 +1,650 @@
+[
+    {
+        "national_id": "19850228-15126-00002-19",
+        "role_id": 9,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "19731222-21101-00001-21",
+        "role_id": 7,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "19870316-14132-00002-17",
+        "role_id": 9,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "19691225-11467-00004-23",
+        "role_id": 9,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "19960327-14122-00001-19",
+        "role_id": 12,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "19920618141210000322",
+        "role_id": 9,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "19810308141220000321",
+        "role_id": 9,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "19991021227104000011",
+        "role_id": 9,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "19980911121110000112",
+        "role_id": 1,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "19861223161130000125",
+        "role_id": 12,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "20001128151300000116",
+        "role_id": 9,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "19980222141280000119",
+        "role_id": 14,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "19940404332010001418",
+        "role_id": 9,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "19860224151250000318",
+        "role_id": 10,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "19981019121260000224",
+        "role_id": 9,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "19971018531190000326",
+        "role_id": 9,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "19950815141220000114",
+        "role_id": 9,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "20000615141290000117",
+        "role_id": 9,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "20000808141130000328",
+        "role_id": 9,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "19940604161130000115",
+        "role_id": 9,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "19800621141080000212",
+        "role_id": 9,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "19910813393190000000",
+        "role_id": 9,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "1986100915112000000",
+        "role_id": 9,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "19961024535040000000",
+        "role_id": 14,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "19890930471040000000",
+        "role_id": 9,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "19900111141210000000",
+        "role_id": 9,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "19900811673110000000",
+        "role_id": 9,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "19930124111010000000",
+        "role_id": 9,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "20020102671150000000",
+        "role_id": 9,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "20011109161130000000",
+        "role_id": 9,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "19991230451130000000",
+        "role_id": 9,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "1996030312118000000",
+        "role_id": 9,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "19980328371010000000",
+        "role_id": 9,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "19960405171090000000",
+        "role_id": 9,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "20010424161040000000",
+        "role_id": 9,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "19990917151150000000",
+        "role_id": 9,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "20000811171060000000",
+        "role_id": 9,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "20001109151080000000",
+        "role_id": 9,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "20050211412170000000",
+        "role_id": 9,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "19990425121050000000",
+        "role_id": 9,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "19930110151030000000",
+        "role_id": 12,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "19920220332100000000",
+        "role_id": 9,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "19940328141290000000",
+        "role_id": 9,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "19991130161070000000",
+        "role_id": 9,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "20030227141250000000",
+        "role_id": 9,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "1991041015115000000",
+        "role_id": 8,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "19980424141130000000",
+        "role_id": 8,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "19991212121050000000",
+        "role_id": 14,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "19970210161110000000",
+        "role_id": 10,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "19981116141220000000",
+        "role_id": 9,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "19940621151080000000",
+        "role_id": 6,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "19970420111010000000",
+        "role_id": 9,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "19990120211100000000",
+        "role_id": 8,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "20000512611080000000",
+        "role_id": 13,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "20000726411100000000",
+        "role_id": 12,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "199801306712900000000",
+        "role_id": 13,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "19980916332040000000",
+        "role_id": 8,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "19990214161130000000",
+        "role_id": 1,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "19990416141300000000",
+        "role_id": 6,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "19901001591220000000",
+        "role_id": 8,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "1991042757401000000",
+        "role_id": 9,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "20020428531150000000",
+        "role_id": 9,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "19940207431020000000",
+        "role_id": 9,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "2000102115129000000",
+        "role_id": 9,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "19991017-14109-00002-28",
+        "role_id": 9,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "19890716141140000000",
+        "role_id": 9,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "19931024160000500",
+        "role_id": 9,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "19930518141300000000",
+        "role_id": 9,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "1994020512010000000",
+        "role_id": 9,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "19981122151140000000",
+        "role_id": 9,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "19870227161100000000",
+        "role_id": 9,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    },
+    {
+        "national_id": "1545464848489",
+        "role_id": 13,
+        "is_active": true,
+        "from_date": "2026-07-02",
+        "created_at": "2026-07-02 10:12:18",
+        "modified_at": "2026-07-02 12:55:35",
+        "description": "Seeded from bcms"
+    }
+]

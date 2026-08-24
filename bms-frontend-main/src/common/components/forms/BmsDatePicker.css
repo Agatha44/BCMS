@@ -1,0 +1,185 @@
+/* BMS date picker — calendar popup polish (Tailwind-aligned) */
+.bms-date-picker.ant-picker {
+  width: 100%;
+  border-radius: 0.5rem;
+  border-color: #cbd5e1;
+  padding-inline: 0.75rem;
+  min-height: 2.5rem;
+}
+
+.bms-date-picker.ant-picker:hover {
+  border-color: #962e32;
+}
+
+.bms-date-picker.ant-picker-focused {
+  border-color: #962e32;
+  box-shadow: 0 0 0 3px rgba(150, 46, 50, 0.12);
+}
+
+.bms-date-picker .ant-picker-input > input {
+  font-size: 0.875rem;
+  color: #0f172a;
+}
+
+.bms-date-picker .ant-picker-input > input::placeholder {
+  color: #94a3b8;
+}
+
+.bms-date-picker-popup .ant-picker-panel-container {
+  border-radius: 0.75rem;
+  box-shadow:
+    0 10px 15px -3px rgba(15, 23, 42, 0.08),
+    0 4px 6px -4px rgba(15, 23, 42, 0.08);
+  border: 1px solid #e2e8f0;
+}
+
+.bms-date-picker-popup .ant-picker-header {
+  border-bottom-color: #f1f5f9;
+}
+
+.bms-date-picker-popup .ant-picker-cell-selected .ant-picker-cell-inner,
+.bms-date-picker-popup .ant-picker-cell-range-start .ant-picker-cell-inner,
+.bms-date-picker-popup .ant-picker-cell-range-end .ant-picker-cell-inner {
+  background: #962e32 !important;
+}
+
+.bms-date-picker-popup .ant-picker-cell-in-range::before {
+  background: #fff5f5 !important;
+}
+
+.bms-date-picker-popup .ant-picker-today-btn {
+  color: #962e32;
+}
+
+.bms-date-picker-popup .ant-picker-footer-extra .ant-btn-link {
+  color: #962e32;
+}
+
+/* BMS filter select — matches date picker field height and focus ring */
+.bms-filter-select.ant-select {
+  width: 100%;
+}
+
+.bms-filter-select.ant-select .ant-select-selector {
+  border-radius: 0.5rem !important;
+  border-color: #cbd5e1 !important;
+  min-height: 2.5rem !important;
+  padding-inline: 0.75rem !important;
+  align-items: center;
+}
+
+.bms-filter-select.ant-select:not(.ant-select-disabled):hover .ant-select-selector {
+  border-color: #962e32 !important;
+}
+
+.bms-filter-select.ant-select-focused .ant-select-selector {
+  border-color: #962e32 !important;
+  box-shadow: 0 0 0 3px rgba(150, 46, 50, 0.12) !important;
+}
+
+.bms-filter-select .ant-select-selection-item,
+.bms-filter-select .ant-select-selection-placeholder {
+  font-size: 0.875rem;
+  color: #0f172a;
+}
+
+.bms-filter-select .ant-select-selection-placeholder {
+  color: #94a3b8;
+}
+
+.bms-filter-select-popup .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
+  background: #fff5f5 !important;
+  color: #962e32 !important;
+  font-weight: 500;
+}
+
+.bms-filter-select-popup .ant-select-item-option-active:not(.ant-select-item-option-disabled) {
+  background: #fff5f5 !important;
+}
+
+/* BMS download select — burgundy trigger (like Generate), filter-select dropdown */
+.bms-download-select.ant-select {
+  width: auto !important;
+}
+
+.bms-download-select.ant-select .ant-select-selector {
+  background-color: #962e32 !important;
+  border-color: #962e32 !important;
+  border-radius: 0.5rem !important;
+  min-height: 2.5rem !important;
+  width: auto !important;
+  padding-inline: 1rem !important;
+  align-items: center;
+  color: #ffffff !important;
+}
+
+.bms-download-select.ant-select:not(.ant-select-disabled):hover .ant-select-selector {
+  background-color: #7a2528 !important;
+  border-color: #7a2528 !important;
+}
+
+.bms-download-select.ant-select-focused .ant-select-selector {
+  background-color: #962e32 !important;
+  border-color: #962e32 !important;
+  box-shadow: 0 0 0 3px rgba(150, 46, 50, 0.12) !important;
+}
+
+.bms-download-select .ant-select-selection-placeholder {
+  color: #ffffff !important;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.bms-download-select .ant-select-arrow,
+.bms-download-select .ant-select-suffix:not(.ant-select-clear) {
+  display: none !important;
+}
+
+.bms-download-select.ant-select-disabled .ant-select-selector {
+  background-color: #962e32 !important;
+  border-color: #962e32 !important;
+  opacity: 0.5;
+}
+
+/* Dark mode */
+html.dark .bms-date-picker.ant-picker {
+  background-color: var(--bms-bg-muted) !important;
+  border-color: var(--bms-border) !important;
+}
+
+html.dark .bms-date-picker .ant-picker-input > input {
+  color: var(--bms-text) !important;
+}
+
+html.dark .bms-date-picker-popup .ant-picker-panel-container {
+  background-color: var(--bms-bg-elevated) !important;
+  border-color: var(--bms-border) !important;
+}
+
+html.dark .bms-date-picker-popup .ant-picker-header {
+  border-bottom-color: var(--bms-border) !important;
+  color: var(--bms-text);
+}
+
+html.dark .bms-date-picker-popup .ant-picker-cell-in-range::before {
+  background: var(--bms-brand-soft) !important;
+}
+
+html.dark .bms-filter-select.ant-select .ant-select-selector {
+  background-color: var(--bms-bg-muted) !important;
+  border-color: var(--bms-border) !important;
+}
+
+html.dark .bms-filter-select .ant-select-selection-item {
+  color: var(--bms-text) !important;
+}
+
+html.dark .bms-filter-select-popup .ant-select-item-option-selected:not(.ant-select-item-option-disabled),
+html.dark .bms-filter-select-popup .ant-select-item-option-active:not(.ant-select-item-option-disabled) {
+  background: var(--bms-brand-soft) !important;
+  color: #f29ea1 !important;
+}
+
+html.dark .bms-download-select .ant-select-selection-placeholder {
+  color: var(--bms-on-brand) !important;
+}

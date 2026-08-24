@@ -1,0 +1,1281 @@
+{
+	"info": {
+		"_postman_id": "bcms-pro-clean-api",
+		"name": "BCMS Pro API",
+		"description": "Bridge Control Management System Pro — API collection.\n\n**Auth:** Run **🔐 Authentication → Login — back office (Sanctum)** first (`POST /api/auth/login`). The Tests script saves `data.token` to `bearer_token` and `token` for `Authorization: Bearer {{bearer_token}}` on other requests.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "bcms-pro"
+	},
+	"item": [
+		{
+			"name": "🔐 Authentication",
+			"item": [
+				{
+					"name": "Login — back office (Sanctum)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// POST /api/auth/login — response: { success, status_code, data: { token, user, roles }, message }",
+									"pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+									"",
+									"let body;",
+									"try {",
+									"    body = pm.response.json();",
+									"} catch (e) {",
+									"    pm.test('Body is JSON', function () { pm.expect.fail('Response is not JSON: ' + e); });",
+									"}",
+									"if (typeof body === 'undefined') { return; }",
+									"const token = body && body.data && body.data.token;",
+									"const ok = body && body.success === true && Number(body.status_code) === 1 && token && typeof token === 'string';",
+									"",
+									"if (ok) {",
+									"    pm.collectionVariables.set('bearer_token', token);",
+									"    pm.collectionVariables.set('token', token);",
+									"    if (pm.environment.name) {",
+									"        pm.environment.set('bearer_token', token);",
+									"        pm.environment.set('token', token);",
+									"    }",
+									"    const uid = body.data.user && body.data.user.id;",
+									"    if (uid != null) { pm.collectionVariables.set('user_id', String(uid)); }",
+									"    pm.test('Sanctum token saved', function () {",
+									"        pm.expect(pm.collectionVariables.get('bearer_token')).to.eql(token);",
+									"    });",
+									"    console.log('Saved bearer_token + token (and user_id if present).');",
+									"} else {",
+									"    const msg = (body && body.message) ? body.message : pm.response.text();",
+									"    pm.test('Login shape / token', function () {",
+									"        pm.expect(ok, 'Expected success=true, status_code=1, data.token — got: ' + msg).to.be.true;",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"your_username\",\n    \"password\": \"your_password\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Back-office staff login (`AuthUser`, Laravel Sanctum).\\n\\n**Response:** `success`, `status_code` (1 = OK), `data.token` (use as `Authorization: Bearer …`), `data.user`, `data.roles`.\\n\\n**Tests:** writes `bearer_token`, `token`, and `user_id` (collection + active environment)."
+					},
+					"response": []
+				},
+				{
+					"name": "Current user",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{bearer_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/auth/user",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"user"
+							]
+						},
+						"description": "GET /api/auth/user — requires Bearer token from Login."
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{bearer_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/auth/logout",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"logout"
+							]
+						},
+						"description": "POST /api/auth/logout — revokes current Sanctum token."
+					},
+					"response": []
+				}
+			],
+			"description": "Back-office authentication: **Login** (`POST /api/auth/login`) stores `data.token` into `bearer_token` and `token`. Use **Bearer {{bearer_token}}** or Postman Bearer auth with the same variable on protected routes."
+		},
+		{
+			"name": "📦 Bundle Management",
+			"item": [
+				{
+					"name": "Get All Bundle Types",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{bearer_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/list-bundle-types",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"list-bundle-types"
+							]
+						},
+						"description": "Get all available toll bundle types (daily, weekly, monthly)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Vehicle Price",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{bearer_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/get-vehicle-price?vehicle_id=1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"get-vehicle-price"
+							],
+							"query": [
+								{
+									"key": "vehicle_id",
+									"value": "1",
+									"description": "Vehicle ID to get pricing for"
+								}
+							]
+						},
+						"description": "Get pricing information for a specific vehicle based on its body type"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Bill Request",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{bearer_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"bill_desc\": \"Daily Bundle Subscription\",\n    \"phone\": \"255123456789\",\n    \"account_no\": \"ACC001\",\n    \"vehicle_id\": 1,\n    \"plate_no\": \"T123ABC\",\n    \"bundle_id\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/post-bill",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"post-bill"
+							]
+						},
+						"description": "Create a new bill request for bundle subscriptions. The bill amount is automatically calculated based on the vehicle's body type and bundle type from the price list.\n\n**Required Fields:**\n- bill_desc: Description of the bill\n- phone: Phone number of the account holder\n- account_no: Account number (must exist in account table)\n- vehicle_id: Vehicle ID (must exist in vehicle table)\n- plate_no: Vehicle plate number (must match vehicle_id)\n- bundle_id: Bundle type (1=daily, 2=weekly, 3=monthly)\n\n**Note:** The bill_amount is automatically calculated from the price list."
+					},
+					"response": []
+				}
+			],
+			"description": "Bundle management endpoints including types, pricing, and bill creation"
+		},
+		{
+			"name": "🌐 Portal Services",
+			"item": [
+				{
+					"name": "Get Bridge Account Details",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"account_no\": \"ACC001\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/portal/bridge-account-details",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"portal",
+								"bridge-account-details"
+							]
+						},
+						"description": "Get account details for bridge service"
+					},
+					"response": []
+				},
+				{
+					"name": "Subscribe to Bridge Service",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"account_no\": \"ACC001\",\n    \"phone\": \"255123456789\",\n    \"email\": \"user@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/portal/subscribe-bridge-service",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"portal",
+								"subscribe-bridge-service"
+							]
+						},
+						"description": "Subscribe an account to bridge service"
+					},
+					"response": []
+				},
+				{
+					"name": "Unsubscribe from Bridge Service",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"account_no\": \"ACC001\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/portal/unsubscribe-bridge-service",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"portal",
+								"unsubscribe-bridge-service"
+							]
+						},
+						"description": "Unsubscribe an account from bridge service"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Bundles (Authenticated)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{bearer_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/portal/list-bundles",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"portal",
+								"list-bundles"
+							]
+						},
+						"description": "Get list of bundles for authenticated user"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Vehicles (Authenticated)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{bearer_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/portal/list-vehicles",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"portal",
+								"list-vehicles"
+							]
+						},
+						"description": "Get list of vehicles for authenticated user"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Top-ups (Authenticated)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{bearer_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/portal/list-top-ups",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"portal",
+								"list-top-ups"
+							]
+						},
+						"description": "Get list of top-ups for authenticated user"
+					},
+					"response": []
+				}
+			],
+			"description": "Portal services for account management and user data"
+		},
+		{
+			"name": "🚗 Vehicle Management",
+			"item": [
+				{
+					"name": "Get Vehicle Data by Plate",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"plate_no\": \"T123ABC\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/get-vehicle-data",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"get-vehicle-data"
+							]
+						},
+						"description": "Get vehicle information by plate number"
+					},
+					"response": []
+				}
+			],
+			"description": "Vehicle management and data retrieval endpoints"
+		},
+		{
+			"name": "🏢 Booth Operations",
+			"item": [
+				{
+					"name": "Open Counter",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_id\": 1,\n    \"lane_id\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/open-counter",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"open-counter"
+							]
+						},
+						"description": "Open a counter for toll collection"
+					},
+					"response": []
+				},
+				{
+					"name": "Close Counter",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_id\": 1,\n    \"lane_id\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/close-counter",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"close-counter"
+							]
+						},
+						"description": "Close a counter for toll collection"
+					},
+					"response": []
+				},
+				{
+					"name": "Record Vehicle Detection",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"plate_no\": \"T123ABC\",\n    \"lane_id\": 1,\n    \"user_id\": 1,\n    \"body_type_id\": 1,\n    \"amount\": 5000\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/detection",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"detection"
+							]
+						},
+						"description": "Record vehicle detection and toll transaction"
+					},
+					"response": []
+				},
+				{
+					"name": "Pay and Go",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"plate_no\": \"T123ABC\",\n    \"amount\": 5000,\n    \"user_id\": 1,\n    \"lane_id\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/pay-and-go",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"pay-and-go"
+							]
+						},
+						"description": "Process pay and go transaction"
+					},
+					"response": []
+				},
+				{
+					"name": "Open Toll Gate",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"lane_id\": 1,\n    \"user_id\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/open-toll-gate",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"open-toll-gate"
+							]
+						},
+						"description": "Open toll gate for vehicle passage"
+					},
+					"response": []
+				},
+				{
+					"name": "Reprint Receipt",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"receipt_number\": \"B123456\",\n    \"user_id\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/reprint-receipt",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"reprint-receipt"
+							]
+						},
+						"description": "Reprint a receipt by receipt number"
+					},
+					"response": []
+				}
+			],
+			"description": "Booth operations for counter management and vehicle processing"
+		},
+		{
+			"name": "📊 Reports & Analytics",
+			"item": [
+				{
+					"name": "Toll Collection Report",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"colletion_type\": \"bundle\",\n    \"from_date\": \"2024-01-01\",\n    \"to_date\": \"2024-01-31\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/toll-collection",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"toll-collection"
+							]
+						},
+						"description": "Get toll collection report for specified date range and collection type"
+					},
+					"response": []
+				},
+				{
+					"name": "Incident Collection Report",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"from_date\": \"2024-01-01\",\n    \"to_date\": \"2024-01-31\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/incident-collection",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"incident-collection"
+							]
+						},
+						"description": "Get incident collection report for specified date range"
+					},
+					"response": []
+				},
+				{
+					"name": "Overload Collection Report",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"from_date\": \"2024-01-01\",\n    \"to_date\": \"2024-01-31\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/overload-collection",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"overload-collection"
+							]
+						},
+						"description": "Get overload collection report for specified date range"
+					},
+					"response": []
+				},
+				{
+					"name": "Event Collection Report",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"from_date\": \"2024-01-01\",\n    \"to_date\": \"2024-01-31\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/event-collection",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"event-collection"
+							]
+						},
+						"description": "Get event collection report for specified date range"
+					},
+					"response": []
+				},
+				{
+					"name": "Overall Monthly Collection",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"year\": 2024\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/overall-monthly-collection",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"overall-monthly-collection"
+							]
+						},
+						"description": "Get overall monthly collection report for specified year"
+					},
+					"response": []
+				},
+				{
+					"name": "Overall Year Collection",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"year\": 2024\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/overall-year-collection",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"overall-year-collection"
+							]
+						},
+						"description": "Get overall year collection report for specified year"
+					},
+					"response": []
+				},
+				{
+					"name": "Account Passage Report",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"account_no\": \"ACC001\",\n    \"from_date\": \"2024-01-01\",\n    \"to_date\": \"2024-01-31\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/account-passage",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"account-passage"
+							]
+						},
+						"description": "Get passage report for specific account"
+					},
+					"response": []
+				}
+			],
+			"description": "Reports and analytics for collection data and financial summaries"
+		},
+		{
+			"name": "⚙️ System Configuration",
+			"item": [
+				{
+					"name": "Get All Users",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users"
+							]
+						},
+						"description": "Get list of all users in the system"
+					},
+					"response": []
+				},
+				{
+					"name": "Add New User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"John Doe\",\n    \"email\": \"john@example.com\",\n    \"password\": \"password123\",\n    \"role\": \"operator\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/add-user",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"add-user"
+							]
+						},
+						"description": "Add a new user to the system"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Lanes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/list-lanes",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"list-lanes"
+							]
+						},
+						"description": "Get list of all lanes in the system"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Body Types",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/list-body-types",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"list-body-types"
+							]
+						},
+						"description": "Get list of all body types with pricing"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Exempted Body Types",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/list-exempted-body-types",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"list-exempted-body-types"
+							]
+						},
+						"description": "Get list of exempted body types"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Report Categories",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/report-categories",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"report-categories"
+							]
+						},
+						"description": "Get list of report categories"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Report Statistics",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"category_id\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/report-stats",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"report-stats"
+							]
+						},
+						"description": "Get report statistics for a category"
+					},
+					"response": []
+				}
+			],
+			"description": "System configuration and administrative endpoints"
+		},
+		{
+			"name": "📱 Commuter Services",
+			"item": [
+				{
+					"name": "Get Commuter Details",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{bearer_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"account_no\": \"ACC001\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/commuter-details",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"commuter-details"
+							]
+						},
+						"description": "Get commuter details for authenticated user"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Commuter Vehicles",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{bearer_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"account_no\": \"ACC001\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/commuter-vehicles",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"commuter-vehicles"
+							]
+						},
+						"description": "Get vehicles for commuter account"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Commuter Bundle Transactions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{bearer_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"account_no\": \"ACC001\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/commuter-bundle-transactions",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"commuter-bundle-transactions"
+							]
+						},
+						"description": "Get bundle transactions for commuter account"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Commuter Top-ups",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{bearer_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"account_no\": \"ACC001\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/commuter-top-ups",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"commuter-top-ups"
+							]
+						},
+						"description": "Get top-ups for commuter account"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Commuter Bundles",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{bearer_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"account_no\": \"ACC001\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/commuter-bundles",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"commuter-bundles"
+							]
+						},
+						"description": "Get bundles for commuter account"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Active Bundle",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{bearer_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"account_no\": \"ACC001\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/commuter-active-bundle",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"commuter-active-bundle"
+							]
+						},
+						"description": "Get active bundle for commuter account"
+					},
+					"response": []
+				},
+				{
+					"name": "Check Control Number",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{bearer_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"bill_id\": 123,\n    \"bill_type\": \"B\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/commuter-check-control-number",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"commuter-check-control-number"
+							]
+						},
+						"description": "Check control number status for commuter"
+					},
+					"response": []
+				}
+			],
+			"description": "Commuter-specific services and account management"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "https://bridge-core-dev.nssf.go.tz",
+			"type": "string",
+			"description": "Active base URL used by requests. Set to DEV by default. Keep without trailing slash."
+		},
+		{
+			"key": "base_url_dev",
+			"value": "https://bridge-core-dev.nssf.go.tz",
+			"type": "string",
+			"description": "Development environment base URL (no trailing slash)"
+		},
+		{
+			"key": "base_url_prod",
+			"value": "https://bcmspro-api.nssf.go.tz",
+			"type": "string",
+			"description": "Production environment base URL (no trailing slash)"
+		},
+		{
+			"key": "bearer_token",
+			"value": "",
+			"type": "string",
+			"description": "Sanctum personal access token from POST /api/auth/login `data.token` (auto-set by Login request Tests)"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string",
+			"description": "Same value as bearer_token (alias for scripts / {{token}})"
+		},
+		{
+			"key": "user_id",
+			"value": "",
+			"type": "string",
+			"description": "Optional: set from login response `data.user.id`"
+		}
+	]
+} 

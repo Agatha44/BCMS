@@ -1,0 +1,234 @@
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+
+class RoleSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
+    {
+        DB::connection('bcmis2')
+            ->table('roles')
+            ->upsert(
+                [
+                    [
+                        'id' => 1,
+                        'role_name' => 'Employee',
+                        'role_description' => 'Sales Operator, Shift Supervisor',
+                        'is_active' => true,
+                        'created_by' => 1,
+                        'created_at' => '2026-07-01 00:40:37',
+                        'modified_by' => 1,
+                        'modified_at' => '2026-07-01 00:40:37',
+                    ],
+                    [
+                        'id' => 6,
+                        'role_name' => 'Employee Registrar',
+                        'role_description' => 'Registration Officer',
+                        'is_active' => true,
+                        'created_by' => 1,
+                        'created_at' => '2026-07-01 00:40:37',
+                        'modified_by' => 1,
+                        'modified_at' => '2026-07-01 00:40:37',
+                    ],
+                    [
+                        'id' => 7,
+                        'role_name' => 'Employee Approver',
+                        'role_description' => 'Assistant Manager',
+                        'is_active' => true,
+                        'created_by' => 1,
+                        'created_at' => '2026-07-01 00:40:37',
+                        'modified_by' => 1,
+                        'modified_at' => '2026-07-01 00:40:37',
+                    ],
+                    [
+                        'id' => 8,
+                        'role_name' => 'Toll Registrar',
+                        'role_description' => 'Registration Officer',
+                        'is_active' => true,
+                        'created_by' => 1,
+                        'created_at' => '2026-07-01 00:40:37',
+                        'modified_by' => 1,
+                        'modified_at' => '2026-07-01 00:40:37',
+                    ],
+                    [
+                        'id' => 9,
+                        'role_name' => 'Toll Collector',
+                        'role_description' => 'Sales Operator',
+                        'is_active' => true,
+                        'created_by' => 1,
+                        'created_at' => '2026-07-01 00:40:37',
+                        'modified_by' => 1,
+                        'modified_at' => '2026-07-01 00:40:37',
+                    ],
+                    [
+                        'id' => 10,
+                        'role_name' => 'Toll Supervisor',
+                        'role_description' => 'Shift Supervisor',
+                        'is_active' => true,
+                        'created_by' => 1,
+                        'created_at' => '2026-07-01 00:40:37',
+                        'modified_by' => 1,
+                        'modified_at' => '2026-07-01 00:40:37',
+                    ],
+                    [
+                        'id' => 11,
+                        'role_name' => 'Toll Reviewer',
+                        'role_description' => 'Assistant Manager',
+                        'is_active' => true,
+                        'created_by' => 1,
+                        'created_at' => '2026-07-01 00:40:37',
+                        'modified_by' => 1,
+                        'modified_at' => '2026-07-01 00:40:37',
+                    ],
+                    [
+                        'id' => 12,
+                        'role_name' => 'Toll Auditor',
+                        'role_description' => 'CCTV Security',
+                        'is_active' => true,
+                        'created_by' => 1,
+                        'created_at' => '2026-07-01 00:40:37',
+                        'modified_by' => 1,
+                        'modified_at' => '2026-07-01 00:40:37',
+                    ],
+                    [
+                        'id' => 13,
+                        'role_name' => 'Toll Administrator',
+                        'role_description' => 'IT',
+                        'is_active' => true,
+                        'created_by' => 1,
+                        'created_at' => '2026-07-01 00:40:37',
+                        'modified_by' => 1,
+                        'modified_at' => '2026-07-01 00:40:37',
+                    ],
+                    [
+                        'id' => 14,
+                        'role_name' => 'Toll Accountant',
+                        'role_description' => 'Accountant',
+                        'is_active' => true,
+                        'created_by' => 1,
+                        'created_at' => '2026-07-01 00:40:37',
+                        'modified_by' => 1,
+                        'modified_at' => '2026-07-01 00:40:37',
+                    ],
+                    [
+                        'id' => 15,
+                        'role_name' => 'Overtime Applicant',
+                        'role_description' => 'All staff applying overtime',
+                        'is_active' => true,
+                        'created_by' => 1,
+                        'created_at' => '2026-07-01 00:40:37',
+                        'modified_by' => 1,
+                        'modified_at' => '2026-07-01 00:40:37',
+                    ],
+                    [
+                        'id' => 16,
+                        'role_name' => 'Overtime Validator',
+                        'role_description' => 'Shift Supervisor for validating applied overtime',
+                        'is_active' => true,
+                        'created_by' => 1,
+                        'created_at' => '2026-07-01 00:40:37',
+                        'modified_by' => 1,
+                        'modified_at' => '2026-07-01 00:40:37',
+                    ],
+                    [
+                        'id' => 17,
+                        'role_name' => 'Overtime Reviewer',
+                        'role_description' => 'Assistant Manager for reviewing overtime',
+                        'is_active' => true,
+                        'created_by' => 1,
+                        'created_at' => '2026-07-01 00:40:37',
+                        'modified_by' => 1,
+                        'modified_at' => '2026-07-01 00:40:37',
+                    ],
+                    [
+                        'id' => 18,
+                        'role_name' => 'Overtime Accountant',
+                        'role_description' => 'For paying overtime',
+                        'is_active' => true,
+                        'created_by' => 1,
+                        'created_at' => '2026-07-01 00:40:37',
+                        'modified_by' => 1,
+                        'modified_at' => '2026-07-01 00:40:37',
+                    ],
+                    [
+                        'id' => 19,
+                        'role_name' => 'Overtime Recommender',
+                        'role_description' => 'Recommend payments on e-Office',
+                        'is_active' => true,
+                        'created_by' => 1,
+                        'created_at' => '2026-07-01 00:40:37',
+                        'modified_by' => 1,
+                        'modified_at' => '2026-07-01 00:40:37',
+                    ],
+                    [
+                        'id' => 20,
+                        'role_name' => 'Overtime Approver',
+                        'role_description' => 'Approve Overtime(e-Office)',
+                        'is_active' => true,
+                        'created_by' => 1,
+                        'created_at' => '2026-07-01 00:40:37',
+                        'modified_by' => 1,
+                        'modified_at' => '2026-07-01 00:40:37',
+                    ],
+                    [
+                        'id' => 21,
+                        'role_name' => 'Payroll Initiator',
+                        'role_description' => 'Payroll Maker and processor',
+                        'is_active' => true,
+                        'created_by' => 1,
+                        'created_at' => '2026-07-01 00:40:37',
+                        'modified_by' => 1,
+                        'modified_at' => '2026-07-01 00:40:37',
+                    ],
+                    [
+                        'id' => 22,
+                        'role_name' => 'Payroll Examiner',
+                        'role_description' => 'Examining payroll',
+                        'is_active' => true,
+                        'created_by' => 1,
+                        'created_at' => '2026-07-01 00:40:37',
+                        'modified_by' => 1,
+                        'modified_at' => '2026-07-01 00:40:37',
+                    ],
+                    [
+                        'id' => 23,
+                        'role_name' => 'Payroll Verifier',
+                        'role_description' => 'Verifying Payroll',
+                        'is_active' => true,
+                        'created_by' => 1,
+                        'created_at' => '2026-07-01 00:40:37',
+                        'modified_by' => 1,
+                        'modified_at' => '2026-07-01 00:40:37',
+                    ],
+                    [
+                        'id' => 24,
+                        'role_name' => 'Payroll Approver',
+                        'role_description' => 'Approving Payroll',
+                        'is_active' => true,
+                        'created_by' => 1,
+                        'created_at' => '2026-07-01 00:40:37',
+                        'modified_by' => 1,
+                        'modified_at' => '2026-07-01 00:40:37',
+                    ],
+                ],
+                ['id'],
+                [
+                    'role_name',
+                    'role_description',
+                    'is_active',
+                    'modified_by',
+                    'modified_at',
+                ]
+            );
+
+        $this->command?->info('Roles seeded successfully into bcmis2.roles.');
+    }
+}

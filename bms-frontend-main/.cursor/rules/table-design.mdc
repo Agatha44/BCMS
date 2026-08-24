@@ -1,0 +1,93 @@
+---
+description: BMS data table conventions (shared DataTable, brand styling, pagination)
+alwaysApply: true
+---
+
+# BMS Data Table Rules
+
+Every list / paginated tabular view in this app must use the shared
+`DataTable` component so brand styling (burgundy headers, polished
+pagination, etc.) is applied consistently.
+
+## 1. Use the shared component
+
+Import the shared component instead of using Ant Design's `<Table>` directly:
+
+```jsx
+import DataTable from '@/common/data/DataTable.jsx';
+
+<DataTable
+    columns={columns}
+    data={rows}
+    loading={loading}
+    pagination={paginationConfig}
+    showSearch={false}
+    showRefresh={false}
+    rowKey={(record) => record.id ?? record.uuid}
+/>
+```
+
+The component lives at `src/common/data/DataTable.jsx`. It already styles:
+
+- **Header row**: solid burgundy `#962E32` background, white text,
+  `font-weight: 600`, `2px` darker burgundy underline, single-line cells
+  with overflow ellipsis.
+- **Hover row**: soft burgundy wash `#fff5f5`.
+- **Cell borders**: subtle slate dividers.
+- **Pagination** (brand pattern — see section 2 below).
+
+Do not redefine these in scoped `<style>` blocks per usage.
+
+## 2. Pagination
+
+The shared component renders pagination right-aligned with:
+
+- Rounded `10px` page buttons, prev/next, jump prev/next, and page-size
+  selector — all with a slate-200 border and slate-700 text.
+- Hover: burgundy `#962E32` border + text, `#fff5f5` background.
+- Active page: solid burgundy `#962E32` with white text.
+- Disabled buttons: light slate background.
+- Page size selector matches the same height/radius and uses a burgundy
+  focus ring (`box-shadow: 0 0 0 3px rgba(150, 46, 50, 0.12)`).
+- Top hairline divider above the controls.
+
+When passing `pagination` as a config object, you typically want:
+
+```js
+const paginationConfig = {
+    current: page,
+    pageSize: perPage,
+    total,
+    showTotal: () => null,        // hide "1-15 of N items"
+    showQuickJumper: false,       // hide "Go to" jump input
+    onChange: handleChange,
+};
+```
+
+`showSizeChanger` defaults to `true`; only set `false` when there is
+truly no need to choose page size.
+
+## 3. Search and action bar
+
+`DataTable` already renders an optional search input + refresh button row.
+Use those props rather than building your own bar above the table:
+
+- `showSearch` (default `true`) — built-in client-side filter input.
+- `showRefresh` (default `true`) — refresh button on the right; supply
+  `onRefresh` to enable it.
+- `rightAction` — provide a custom right-side action (e.g. an "Add"
+  button) which replaces the refresh button when provided.
+
+If your page has its own search bar / actions outside the table (e.g.
+the Vehicle Management plate-number lookup), set `showSearch={false}`
+and `showRefresh={false}` to avoid duplication.
+
+## 4. Don't
+
+- ❌ Do not import `Table` from `antd` directly for tabular data — use
+  `DataTable`.
+- ❌ Do not duplicate the pagination CSS in scoped `<style>` blocks.
+  All brand styling is centralized in `DataTable.jsx`.
+- ❌ Do not switch pagination colors away from brand burgundy.
+- ❌ Do not render pagination on the left or center; it must stay
+  right-aligned with the hairline divider on top.

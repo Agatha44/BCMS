@@ -1,0 +1,67 @@
+<IfModule mod_rewrite.c>
+    <IfModule mod_negotiation.c>
+        Options -MultiViews -Indexes
+    </IfModule>
+
+    RewriteEngine On
+
+       # Redirect sensitive configuration files to root
+    RewriteRule ^web\.config$ / [R=302,L]
+    RewriteRule ^\.htaccess$ / [R=302,L]
+    RewriteRule ^\.env$ / [R=302,L]
+    RewriteRule ^composer\.(json|lock)$ / [R=302,L]
+    RewriteRule ^package(-lock)?\.json$ / [R=302,L]
+    RewriteRule ^\.git / [R=302,L]
+    RewriteRule ^phpunit\.xml$ / [R=302,L]
+    RewriteRule ^vite\.config\.(js|ts)$ / [R=302,L]
+    RewriteRule ^tsconfig.*\.json$ / [R=302,L]
+
+    # Handle Authorization Header
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # Redirect Trailing Slashes If Not A Folder...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_URI} (.+)/$
+    RewriteRule ^ %1 [L,R=301]
+
+    # Send Requests To Front Controller...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+# Security headers
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options nosniff
+    # Framing: use CSP frame-ancestors only (X-Frame-Options DENY blocks your SPA from embedding the API in an iframe)
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
+    # Content-Security-Policy: set in App\Http\Middleware\ContentSecurityPolicyHeaders (Log Viewer needs inline scripts/styles; Apache SetEnvIf was unreliable behind nginx/subpaths)
+</IfModule>
+
+# Enable compression for API responses
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE application/json
+    AddOutputFilterByType DEFLATE application/xml
+    AddOutputFilterByType DEFLATE text/plain
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE application/javascript
+</IfModule>
+
+# Cache control for API responses
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType application/json "access plus 2 minutes"
+    ExpiresByType application/xml "access plus 2 minutes"
+</IfModule>
+
+# PHP Configuration for PDF generation and HTTP requests
+<IfModule mod_php8.c>
+    php_value max_execution_time 300
+    php_value memory_limit 356M
+    php_value default_socket_timeout 30
+    php_value auto_detect_line_endings 1
+</IfModule>

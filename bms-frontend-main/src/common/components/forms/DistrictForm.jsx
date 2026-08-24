@@ -1,0 +1,161 @@
+import { useState, useEffect } from 'react';
+import { Button, Col, Form, Input, Row, Checkbox, Select } from 'antd';
+import PropTypes from 'prop-types';
+
+const { TextArea } = Input;
+const { Option } = Select;
+
+const DistrictForm = ({ onSubmit, onCancel, initialValues, domiciles = [] }) => {
+  const [form] = Form.useForm();
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (initialValues) {
+      form.setFieldsValue({
+        name: initialValues.name || initialValues.district_name,
+        domicile_id: initialValues.domicile_id || initialValues.region_id || initialValues.region?.id || initialValues.domicile?.id,
+        description: initialValues.description,
+        is_active: initialValues.is_active !== undefined ? initialValues.is_active : true,
+      });
+    } else {
+      form.resetFields();
+    }
+  }, [initialValues, form]);
+
+  const handleSubmit = async (values) => {
+    setLoading(true);
+    try {
+      const formData = {
+        ...values,
+        domicile_id: values.domicile_id ? parseInt(values.domicile_id) : null,
+        is_active: values.is_active !== undefined ? values.is_active : true
+      };
+
+      if (onSubmit) {
+        await onSubmit(formData);
+      }
+    } catch (error) {
+      console.error('Form submission error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Form
+      form={form}
+      layout="vertical"
+      onFinish={handleSubmit}
+      initialValues={{ is_active: true, ...initialValues }}
+      autoComplete="off"
+      style={{ textAlign: 'left' }}
+    >
+      <Row gutter={[16, 16]}>
+        <Col span={24}>
+          <Form.Item
+            name="domicile_id"
+            label="Domicile/Region Name"
+            rules={[
+              {
+                required: true,
+                message: 'Please select a domicile/region'
+              }
+            ]}
+          >
+            <Select 
+              placeholder="Select domicile/region"
+              showSearch
+              filterOption={(input, option) =>
+                (option?.children ?? '').toLowerCase().includes(input.toLowerCase())
+              }
+            >
+              {domiciles.map((domicile) => (
+                <Option key={domicile.id} value={domicile.id}>
+                  {domicile.name || domicile.region_name}
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
+        </Col>
+      </Row>
+
+      <Row gutter={[16, 16]}>
+        <Col span={24}>
+          <Form.Item
+            name="name"
+            label="District Name"
+            rules={[
+              {
+                required: true,
+                message: 'Please enter district name'
+              }
+            ]}
+          >
+            <Input placeholder="Enter district name" />
+          </Form.Item>
+        </Col>
+      </Row>
+
+      <Row gutter={[16, 16]}>
+        <Col span={24}>
+          <Form.Item
+            name="description"
+            label="Description"
+          >
+            <TextArea 
+              placeholder="Enter description" 
+              rows={4}
+            />
+          </Form.Item>
+        </Col>
+      </Row>
+
+      <Row gutter={[16, 16]}>
+        <Col span={24}>
+          <Form.Item
+            name="is_active"
+            valuePropName="checked"
+          >
+            <Checkbox>Active</Checkbox>
+          </Form.Item>
+        </Col>
+      </Row>
+
+      {/* Form Actions */}
+      <Row gutter={[16, 16]}>
+        <Col span={24}>
+          <Form.Item style={{ marginBottom: 0 }}>
+            <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+              {onCancel && (
+                <Button onClick={onCancel}>
+                  Cancel
+                </Button>
+              )}
+              <Button
+                type="primary"
+                htmlType="submit"
+                loading={loading}
+                style={{
+                  backgroundColor: '#962E32',
+                  borderColor: '#962E32'
+                }}
+              >
+                Submit
+              </Button>
+            </div>
+          </Form.Item>
+        </Col>
+      </Row>
+    </Form>
+  );
+};
+
+DistrictForm.propTypes = {
+  onSubmit: PropTypes.func,
+  onCancel: PropTypes.func,
+  initialValues: PropTypes.object,
+  domiciles: PropTypes.array
+};
+
+export default DistrictForm;
+
