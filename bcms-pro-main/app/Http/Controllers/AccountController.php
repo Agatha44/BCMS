@@ -935,7 +935,7 @@ class AccountController extends BasicController
 
             Cache::put($cacheKey, $otp, now()->addMinutes(5));
 
-            $smsBody = 'OTP: ' . $otp . "\n";
+            $smsBody = 'Bridge Management System account verification OTP: ' . $otp .'For Account Owner: ' . $request->input('first_name') . ' ' . $request->input('surname') . ' Valid for 60 seconds' ."\n";
             $this->trySendAccountCreationOtpSms($phone, $smsBody);
 
             $email = $request->input('email');
