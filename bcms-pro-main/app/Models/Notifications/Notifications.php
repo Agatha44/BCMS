@@ -17,68 +17,124 @@ class Notifications extends Model
     {
         $recipient = self::normalizePhoneNumber($SMS_RECIPIENT);
 
-        try {
-            $response = Http::timeout(30)->post(config('params.paths.direct_sms'), [
-                'RECIPIENT' => $recipient,
-                'MESSAGE_BODY' => $SMS_BODY,
-                'PROCESS' => $SMS_PROCESS,
-                'SYSTEM' => 'BMS',
-            ]);
+        $payload = [
+            'RECIPIENT' => $recipient,
+            'MESSAGE_BODY' => $SMS_BODY,
+            'PROCESS' => $SMS_PROCESS,
+            'SYSTEM' => 'BMS',
+        ];
 
-            if ($response->successful()) {
+        $directResponse = null;
+
+        try {
+            $directResponse = Http::timeout(15)->post(config('params.paths.direct_sms'), $payload);
+
+            if ($directResponse->successful()) {
                 Log::info('Direct SMS successful', [
                     'recipient' => $recipient,
                     'process' => $SMS_PROCESS,
-                    'status' => $response->status(),
-                    'body' => $response->body(),
+                    'status' => $directResponse->status(),
+                    'body' => $directResponse->body(),
                 ]);
-                return $response;
+            } else {
+                Log::warning('Direct SMS failed', [
+                    'recipient' => $recipient,
+                    'process' => $SMS_PROCESS,
+                    'status' => $directResponse->status(),
+                    'body' => $directResponse->body(),
+                ]);
             }
-
-            Log::warning('Direct SMS failed, falling back to ICTMS', [
-                'recipient' => $recipient,
-                'process' => $SMS_PROCESS,
-                'status' => $response->status(),
-                'body' => $response->body(),
-            ]);
         } catch (\Exception $e) {
-            Log::warning('Direct SMS exception, falling back to ICTMS', [
+            Log::warning('Direct SMS exception', [
                 'recipient' => $recipient,
                 'process' => $SMS_PROCESS,
                 'error' => $e->getMessage(),
             ]);
         }
 
-        return self::sendIctmsSmsNotification($recipient, $SMS_BODY, $SMS_PROCESS, $expiryMinutes);
+        $ictmsResponse = self::sendIctmsSmsNotification($recipient, $SMS_BODY, $SMS_PROCESS, $expiryMinutes);
+
+        return ($directResponse && $directResponse->successful()) ? $directResponse : $ictmsResponse;
+    }
+
+    protected static function ictmsSmsUrl(): string
+    {
+        if (app()->environment('local')) {
+            return 'https://ictmspre-api.nssf.go.tz/api/send-notification';
+        }
+
+        return config('params.paths.ictms_sms_notification');
     }
 
     protected static function sendIctmsSmsNotification($recipient, $body, $process, $expiryMinutes = 30)
     {
-        return Http::timeout(30)->post(config('params.paths.ictms_sms_notification'), [
-            'notification_type' => 'sms',
-            'notification_method' => 'instant',
-            'notification_system' => 'BMS',
-            'notification_process' => $process,
-            'notification_recipient' => $recipient,
-            'notification_body' => $body,
-            'notification_attachment' => null,
-            'notification_expiry' => $expiryMinutes,
-        ]);
+        try {
+            $response = Http::timeout(15)->post(self::ictmsSmsUrl(), [
+                'notification_type' => 'sms',
+                'notification_method' => 'instant',
+                'notification_system' => 'BMS',
+                'notification_process' => 'MEMBER SMS',
+                'notification_recipient' => $recipient,
+                'notification_body' => $body,
+                'notification_attachment' => null,
+                'notification_expiry' => $expiryMinutes,
+            ]);
+
+            if ($response->successful()) {
+                Log::info('ICTMS SMS successful', [
+                    'recipient' => $recipient,
+                    'process' => $process,
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                ]);
+            } else {
+                Log::warning('ICTMS SMS failed', [
+                    'recipient' => $recipient,
+                    'process' => $process,
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                ]);
+            }
+
+            return $response;
+        } catch (\Exception $e) {
+            Log::warning('ICTMS SMS exception', [
+                'recipient' => $recipient,
+                'process' => $process,
+                'error' => $e->getMessage(),
+            ]);
+
+            return null;
+        }
     }
 
     protected static function normalizePhoneNumber($phone): string
     {
-        $phone = preg_replace('/\D+/', '', trim((string) $phone));
-    
-        if (str_starts_with($phone, '0')) {
-            return '255' . substr($phone, 1);
+        $digits = preg_replace('/\D+/', '', trim((string) $phone));
+
+        if ($digits === '') {
+            return '';
         }
-    
-        if (str_starts_with($phone, '255')) {
-            return $phone;
+
+        if (strlen($digits) >= 12 && str_starts_with($digits, '255')) {
+            $rest = substr($digits, 3);
+            $subscriber = strlen($rest) > 9 ? ltrim($rest, '0') : $rest;
+            $subscriber = substr(preg_replace('/\D/', '', $subscriber), -9);
+
+            return '255' . str_pad($subscriber ?: '0', 9, '0', STR_PAD_LEFT);
         }
-    
-        return $phone;
+
+        if (strlen($digits) === 9) {
+            return '255' . $digits;
+        }
+
+        if (strlen($digits) >= 10) {
+            $subscriber = ltrim(substr($digits, -10), '0');
+
+            return '255' . str_pad($subscriber ?: '0', 9, '0', STR_PAD_LEFT);
+        }
+
+        return $digits;
     }
 
     /**

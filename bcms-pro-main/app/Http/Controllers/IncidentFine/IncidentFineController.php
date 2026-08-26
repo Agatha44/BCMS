@@ -203,7 +203,7 @@ class IncidentFineController extends BasicController
                 'payment_type' => 1,
                 'payerid' => $request->phone_number,
                 'payer_name' => $request->payer_name,
-                'payer_cell' => $request->phone_number,
+                'payer_cell' => GePG::normalizePayerCell((string) $request->phone_number),
                 'generated_by' => (string)($user->id ?? 'system'),
                 'days_expires_after' => 30,
                 'payer_email' => $request->email,

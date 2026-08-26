@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { AlertCircle, Eye, Loader2 } from 'lucide-react';
-import { ReloadOutlined } from '@ant-design/icons';
+import { AlertCircle } from 'lucide-react';
 
 import DataTable from '../../../data/DataTable.jsx';
 import BundleBillDetailsModal from './BundleBillDetailsModal.jsx';
@@ -221,8 +220,7 @@ export default function BundleBills() {
               e.currentTarget.style.backgroundColor = '#902D30';
             }}
           >
-            <Eye size={16} className="text-white" />
-            <span>View</span>
+            View
           </button>
         ),
       },
@@ -286,11 +284,10 @@ export default function BundleBills() {
                 onClick={() =>
                   fetchBundleBills(pagination.current_page, pagination.per_page, debouncedSearchTerm)
                 }
-                className="btn-secondary flex items-center space-x-2 px-3 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="btn-secondary px-3 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={loading}
               >
-                {loading ? <Loader2 size={16} className="animate-spin" /> : <ReloadOutlined className="text-gray-700" />}
-                <span>Refresh</span>
+                Refresh
               </button>
 
               <button
@@ -305,7 +302,7 @@ export default function BundleBills() {
                   if (!e.currentTarget.disabled) e.currentTarget.style.backgroundColor = '#902D30';
                 }}
               >
-                <span>Bill Vehicle</span>
+                <span>Bill</span>
               </button>
             </div>
           }
@@ -315,7 +312,7 @@ export default function BundleBills() {
       <RequestBundleModal
         open={showRequestBundleModal}
         onClose={() => setShowRequestBundleModal(false)}
-        title="Bill Vehicle"
+        title="Bill"
         submitLabel="Request Bundle"
         showAccountSummary={false}
         onSuccess={(success) => {

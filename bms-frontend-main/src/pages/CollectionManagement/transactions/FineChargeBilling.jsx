@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { AlertCircle, CheckCircle2, Copy, Eye, Plus } from 'lucide-react';
-import { ReloadOutlined } from '@ant-design/icons';
+import { AlertCircle, CheckCircle2, Copy } from 'lucide-react';
 import { Button, Modal, Tag, message as antMessage } from 'antd';
 import PropTypes from 'prop-types';
 
@@ -262,7 +261,6 @@ export default function FineChargeBilling() {
               }}
               onClick={() => openDetails(r)}
             >
-              <Eye size={14} />
               View
             </button>
           </div>
@@ -356,11 +354,10 @@ export default function FineChargeBilling() {
                 <button
                   type="button"
                   onClick={refreshList}
-                  className="btn-secondary flex items-center space-x-2 px-3 py-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="btn-secondary px-3 py-2 disabled:cursor-not-allowed disabled:opacity-50"
                   disabled={loading}
                 >
-                  <ReloadOutlined className="text-gray-700" />
-                  <span>Refresh</span>
+                  Refresh
                 </button>
 
                 <button
@@ -375,8 +372,7 @@ export default function FineChargeBilling() {
                   }}
                   onClick={() => setShowCreateModal(true)}
                 >
-                  <Plus size={16} />
-                  <span>Request Fine Charge Bill</span>
+                  <span>Bill</span>
                 </button>
               </div>
             }

@@ -169,6 +169,11 @@ html.light .brand-modal .ant-modal-body {
   }
 }
 
+/* SweetAlert2 default z-index (1060) sits under nested Ant Design modals (1100). */
+.swal2-container {
+  z-index: 3000 !important;
+}
+
 /* Prevent horizontal scroll on body */
 body {
   overflow-x: hidden;

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ShieldAlert, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { Button, DatePicker, Form, Input, InputNumber, Modal, Select } from 'antd';
 import PropTypes from 'prop-types';
 import dayjs from 'dayjs';
@@ -96,12 +96,12 @@ export default function CreateIncidentBillModal({ isOpen, onClose, onCreated }) 
       afterOpenChange={handleAfterOpenChange}
       title={null}
       closable={false}
-      maskClosable={!submitting}
-      keyboard={!submitting}
+      maskClosable={false}
+      keyboard={false}
       className="brand-modal"
       styles={{ body: { padding: 0 }, content: { padding: 0, overflow: 'hidden' } }}
     >
-      <BrandModalHeader title="Create Incident Bill" onClose={closeModal} />
+      <BrandModalHeader title="Bill" onClose={closeModal} />
       <Form
         id="create-incident-bill-form"
         form={form}
@@ -231,7 +231,6 @@ export default function CreateIncidentBillModal({ isOpen, onClose, onCreated }) 
             type="primary"
             htmlType="submit"
             loading={submitting}
-            icon={<ShieldAlert size={14} />}
             style={{ backgroundColor: BRAND, borderColor: BRAND }}
             onMouseEnter={(e) => {
               if (!e.currentTarget.disabled) {
@@ -246,7 +245,7 @@ export default function CreateIncidentBillModal({ isOpen, onClose, onCreated }) 
               }
             }}
           >
-            Create Incident Bill
+            Bill
           </Button>
           <Button onClick={closeModal} disabled={submitting}>Close</Button>
         </div>

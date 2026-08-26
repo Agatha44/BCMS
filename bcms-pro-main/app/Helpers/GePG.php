@@ -181,6 +181,10 @@ class GePG
 
     public static function postBill($data)
     {
+        if (!empty($data['payer_cell'])) {
+            $data['payer_cell'] = self::normalizePayerCell((string) $data['payer_cell']);
+        }
+
         $validator = Validator::make($data, [
             'payment_ref' => 'required|string',
             'amount' => 'required|numeric',
@@ -220,7 +224,32 @@ class GePG
 
         Log::info('GePG data', ['data' => $data]);
 
-        $response = Http::post($gepgConfig['url'], $data);
+        $url = $gepgConfig['url'] ?? null;
+        if (empty($url)) {
+            if (self::shouldStubLocally()) {
+                return self::localStubResponse($data);
+            }
+
+            return [
+                'status' => 'error',
+                'message' => 'GePG URL is not configured',
+            ];
+        }
+
+        try {
+            $response = Http::timeout(20)->post($url, $data);
+        } catch (\Throwable $e) {
+            Log::error('GePG HTTP request failed', ['error' => $e->getMessage()]);
+
+            if (self::shouldStubLocally()) {
+                return self::localStubResponse($data);
+            }
+
+            return [
+                'status' => 'error',
+                'message' => 'GePG request failed: ' . $e->getMessage(),
+            ];
+        }
 
         Log::info('GePG response', [
             'response' => $response->json() ?? $response->body() ?? $response
@@ -253,10 +282,18 @@ class GePG
 
         // check if GePG response indicates success (status: 1)
         if (isset($responseData['status']) && $responseData['status'] == 1) {
+            $payload = $responseData['data'] ?? $responseData;
+            $controlNum = $payload['control_num']
+                ?? $payload['contr_num']
+                ?? $responseData['control_num']
+                ?? $responseData['contr_num']
+                ?? null;
+
             return [
                 'status' => 'success',
                 'message' => $responseData['message'] ?? 'Bill posted successfully',
-                'data' => $responseData['data'] ?? $responseData
+                'control_num' => $controlNum,
+                'data' => $payload,
             ];
         }
 
@@ -265,6 +302,40 @@ class GePG
             'status' => 'error',
             'message' => $responseData['message'] ?? 'Bill posting failed',
             'data' => $responseData
+        ];
+    }
+
+    public static function isRemoteEnabled(): bool
+    {
+        return !empty(config('app.gepg.url'));
+    }
+
+    public static function shouldStubLocally(): bool
+    {
+        return !self::isRemoteEnabled() && (config('app.env') === 'local' || config('app.debug'));
+    }
+
+    /**
+     * Local-only GePG stand-in so bills can be created without IDS_URL.
+     */
+    private static function localStubResponse(array $data): array
+    {
+        $refDigits = preg_replace('/\D/', '', (string) ($data['payment_ref'] ?? ''));
+        $controlNum = '99' . substr(str_pad($refDigits ?: (string) time(), 10, '0', STR_PAD_LEFT), -10);
+
+        Log::warning('GePG URL is not configured; returning local stub bill', [
+            'payment_ref' => $data['payment_ref'] ?? null,
+            'control_num' => $controlNum,
+        ]);
+
+        return [
+            'status' => 'success',
+            'message' => 'Bill posted successfully (local GePG stub)',
+            'control_num' => $controlNum,
+            'data' => [
+                'control_num' => $controlNum,
+                'stub' => true,
+            ],
         ];
     }
 }

@@ -12,6 +12,7 @@ use App\Models\BodyType;
 use App\Models\TollBundle;
 use App\Models\PriceList;
 use App\Models\IdsMessages;
+use App\Models\Notifications\Notifications;
 use App\Models\BridgeBill;
 use App\Models\TollTransaction;
 use App\Models\Receipt;
@@ -22,7 +23,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
@@ -935,8 +935,25 @@ class AccountController extends BasicController
 
             Cache::put($cacheKey, $otp, now()->addMinutes(5));
 
-            $smsBody = 'Your BMS account verification code is ' . $otp . '. It expires in 5 minutes.';
+            $smsBody = 'OTP: ' . $otp . "\n";
             $this->trySendAccountCreationOtpSms($phone, $smsBody);
+
+            $email = $request->input('email');
+            if ($email) {
+                try {
+                    Notifications::pushEmailNotification(
+                        $email,
+                        'BMS account verification code',
+                        $smsBody,
+                        'Bridge_OTP'
+                    );
+                } catch (\Throwable $emailException) {
+                    Log::warning('Account creation OTP email failed', [
+                        'email' => $email,
+                        'message' => $emailException->getMessage(),
+                    ]);
+                }
+            }
 
             Log::info('Account creation OTP generated', [
                 'phone' => $this->maskPhone($phone),
@@ -1020,7 +1037,6 @@ class AccountController extends BasicController
             if ($account->save()) {
                 $account->refresh();
 
-                // Send SMS notification
                 if ($account->account_no) {
                     $this->sendAccountCreationSMS($account, $account->account_no);
                 }
@@ -1291,13 +1307,31 @@ class AccountController extends BasicController
 
     private function normalizePhoneNumber(?string $phone): string
     {
-        $phone = preg_replace('/\D+/', '', trim((string) $phone));
+        $digits = preg_replace('/\D+/', '', trim((string) $phone));
 
-        if (str_starts_with($phone, '0')) {
-            return '255' . substr($phone, 1);
+        if ($digits === '') {
+            return '';
         }
 
-        return $phone;
+        if (strlen($digits) >= 12 && str_starts_with($digits, '255')) {
+            $rest = substr($digits, 3);
+            $subscriber = strlen($rest) > 9 ? ltrim($rest, '0') : $rest;
+            $subscriber = substr(preg_replace('/\D/', '', $subscriber), -9);
+
+            return '255' . str_pad($subscriber ?: '0', 9, '0', STR_PAD_LEFT);
+        }
+
+        if (strlen($digits) === 9) {
+            return '255' . $digits;
+        }
+
+        if (strlen($digits) >= 10) {
+            $subscriber = ltrim(substr($digits, -10), '0');
+
+            return '255' . str_pad($subscriber ?: '0', 9, '0', STR_PAD_LEFT);
+        }
+
+        return $digits;
     }
 
     private function accountCreationOtpCacheKey(?string $phone): string
@@ -1319,30 +1353,38 @@ class AccountController extends BasicController
 
     private function trySendAccountCreationOtpSms(?string $phone, string $smsBody): void
     {
-        // Local SMS gateways (NSSF ESB/ICTMS) are not reachable from this machine
-        // and a 30s hang closes the HTTP connection ("Failed to fetch").
-        if (app()->environment('local')) {
-            Log::info('Skipping remote OTP SMS in local environment', [
-                'phone' => $this->maskPhone($phone),
-            ]);
+        $recipient = $this->normalizePhoneNumber($phone);
+        if ($recipient === '') {
+            Log::warning('Account creation OTP SMS skipped: empty phone');
             return;
         }
 
-        $url = config('params.paths.direct_sms');
-        if (!$url) {
-            return;
+        $smsSource = config('app.sms_source');
+        if (!$smsSource || strcasecmp(trim((string) $smsSource), 'WRONG FORM') === 0) {
+            $smsSource = 'BMS';
         }
 
         try {
-            Http::timeout(3)->post($url, [
-                'RECIPIENT' => $this->normalizePhoneNumber($phone),
-                'MESSAGE_BODY' => $smsBody,
-                'PROCESS' => 'Bridge_OTP',
-                'SYSTEM' => 'BMS',
+            $logSms = new IdsMessages();
+            $logSms->sms_body = $smsBody;
+            $logSms->sms_recipient = $recipient;
+            $logSms->sms_source = $smsSource;
+            $logSms->sms_process = 'Bridge_OTP';
+            $logSms->status = 0;
+            $logSms->created_at = now();
+            $logSms->save();
+        } catch (\Throwable $queueException) {
+            Log::warning('Failed to queue account creation OTP SMS', [
+                'phone' => $this->maskPhone($recipient),
+                'message' => $queueException->getMessage(),
             ]);
+        }
+
+        try {
+            Notifications::pushSmsNotification($recipient, $smsBody, 'Bridge_OTP', 5);
         } catch (\Throwable $smsException) {
             Log::warning('Account creation OTP SMS failed', [
-                'phone' => $this->maskPhone($phone),
+                'phone' => $this->maskPhone($recipient),
                 'message' => $smsException->getMessage(),
             ]);
         }

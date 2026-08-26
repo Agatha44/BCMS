@@ -18,8 +18,8 @@ const getEnvironmentConfig = () => {
     case 'development':
     default:
       return {
-        // Local Laravel is on 8001 because 8000 is already used by another app.
-        API_BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8001',
+        // Empty in local so the Vite proxy forwards /api to Laravel on 8000.
+        API_BASE_URL: import.meta.env.VITE_API_BASE_URL ?? '',
         APP_NAME: 'Bridge Collection Management System',
         VERSION: '1.0.0',
       };

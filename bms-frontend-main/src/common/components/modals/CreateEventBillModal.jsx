@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { CalendarDays, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { Button, DatePicker, Form, Input, InputNumber, Modal } from 'antd';
 import PropTypes from 'prop-types';
 import Swal from 'sweetalert2';
@@ -79,12 +79,12 @@ export default function CreateEventBillModal({ isOpen, onClose, onCreated }) {
       destroyOnHidden
       title={null}
       closable={false}
-      maskClosable={!submitting}
-      keyboard={!submitting}
+      maskClosable={false}
+      keyboard={false}
       className="brand-modal"
       styles={{ body: { padding: 0 }, content: { padding: 0, overflow: 'hidden' } }}
     >
-      <BrandModalHeader title="Create Event Bill" onClose={closeModal} />
+      <BrandModalHeader title="Bill" onClose={closeModal} />
       <Form
         id="create-event-bill-form"
         form={form}
@@ -184,7 +184,6 @@ export default function CreateEventBillModal({ isOpen, onClose, onCreated }) {
             type="primary"
             htmlType="submit"
             loading={submitting}
-            icon={<CalendarDays size={14} />}
             style={{ backgroundColor: BRAND, borderColor: BRAND }}
             onMouseEnter={(e) => {
               if (!e.currentTarget.disabled) {
@@ -199,7 +198,7 @@ export default function CreateEventBillModal({ isOpen, onClose, onCreated }) {
               }
             }}
           >
-            Create Event Bill
+            Bill
           </Button>
           <Button onClick={closeModal} disabled={submitting}>Close</Button>
         </div>

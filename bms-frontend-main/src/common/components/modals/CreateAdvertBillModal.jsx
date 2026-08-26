@@ -88,12 +88,12 @@ export default function CreateAdvertBillModal({ isOpen, onClose, onCreated }) {
       destroyOnHidden
       title={null}
       closable={false}
-      maskClosable={!submitting}
-      keyboard={!submitting}
+      maskClosable={false}
+      keyboard={false}
       className="brand-modal"
       styles={{ body: { padding: 0 }, content: { padding: 0, overflow: 'hidden' } }}
     >
-      <BrandModalHeader title="Create Advert Bill" onClose={closeModal} />
+      <BrandModalHeader title="Bill" onClose={closeModal} />
       <Form
         id="create-advert-bill-form"
         form={form}

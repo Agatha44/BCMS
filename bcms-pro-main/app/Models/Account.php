@@ -15,6 +15,7 @@ class Account extends Authenticatable
     protected $table = 'account';
 
     protected $fillable = [
+        'account_no',
         'nida',
         'first_name',
         'middle_name',
@@ -30,6 +31,32 @@ class Account extends Authenticatable
     ];
 
     protected $appends = ['full_name'];
+
+    protected static function booted()
+    {
+        static::created(function (Account $account) {
+            if (!empty($account->account_no)) {
+                return;
+            }
+
+            $account->refresh();
+            if (!empty($account->account_no)) {
+                return;
+            }
+
+            $candidate = 'ACC' . str_pad((string) $account->id, 6, '0', STR_PAD_LEFT);
+            $exists = static function (string $accountNo) use ($account) {
+                return Account::where('account_no', $accountNo)->where('id', '!=', $account->id)->exists();
+            };
+
+            while ($exists($candidate)) {
+                $candidate = 'ACC' . str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+            }
+
+            $account->account_no = $candidate;
+            $account->saveQuietly();
+        });
+    }
 
     public function getFullNameAttribute()
     {

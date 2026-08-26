@@ -211,7 +211,7 @@ class OverloadFineController extends BasicController
                 'payment_type' => 1,
                 'payerid' => $request->vehicle_num,
                 'payer_name' => $payer_name,
-                'payer_cell' => $request->pyr_cell_num,
+                'payer_cell' => GePG::normalizePayerCell((string) $request->pyr_cell_num),
                 'generated_by' => (string)($user->id ?? 'system'),
                 'days_expires_after' => 30,
                 'payer_email' => $request->pyr_email ?? 'noreply@nssf.go.tz',

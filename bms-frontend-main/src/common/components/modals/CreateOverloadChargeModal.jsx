@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Plus, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { Button, Form, Input, InputNumber, Modal } from 'antd';
 import PropTypes from 'prop-types';
 import Swal from 'sweetalert2';
@@ -90,12 +90,12 @@ export default function CreateOverloadChargeModal({ isOpen, onClose, onCreated }
       destroyOnHidden
       title={null}
       closable={false}
-      maskClosable={!submitting}
-      keyboard={!submitting}
+      maskClosable={false}
+      keyboard={false}
       className="brand-modal"
       styles={{ body: { padding: 0 }, content: { padding: 0, overflow: 'hidden' } }}
     >
-      <BrandModalHeader title="Overload Charge" onClose={closeModal} />
+      <BrandModalHeader title="Bill" onClose={closeModal} />
       <Form
         form={form}
         layout="vertical"
@@ -209,7 +209,6 @@ export default function CreateOverloadChargeModal({ isOpen, onClose, onCreated }
             type="primary"
             htmlType="submit"
             loading={submitting}
-            icon={<Plus size={14} />}
             style={{ backgroundColor: BRAND, borderColor: BRAND }}
             onMouseEnter={(e) => {
               if (!e.currentTarget.disabled) {
@@ -224,7 +223,7 @@ export default function CreateOverloadChargeModal({ isOpen, onClose, onCreated }
               }
             }}
           >
-            Request Overload Bill
+            Bill
           </Button>
           <Button onClick={closeModal} disabled={submitting}>
             Close

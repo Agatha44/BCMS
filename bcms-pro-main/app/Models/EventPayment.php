@@ -64,7 +64,6 @@ class EventPayment extends Model
         'trx_id' => 'integer',
         'bill_cancel_by' => 'integer',
         'http_status' => 'integer',
-        'source' => 'integer',
     ];
 
     // Scopes

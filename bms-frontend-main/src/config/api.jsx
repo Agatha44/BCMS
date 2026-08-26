@@ -9,7 +9,7 @@ const getApiBaseUrl = () => {
       return 'https://bridge-core-dev.nssf.go.tz';
     case 'development':
     default:
-      return import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8001';
+      return import.meta.env.VITE_API_BASE_URL ?? '';
   }
 };
 

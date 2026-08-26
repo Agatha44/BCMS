@@ -1,15 +1,3 @@
-import {
-    Receipt,
-    Package,
-    Wallet,
-    Megaphone,
-    Calendar,
-    AlertTriangle,
-    Scale,
-    Clock,
-    Gavel,
-} from 'lucide-react';
-
 import SoDTabbedPage from './components/SoDTabbedPage.jsx';
 import TollTransactions from './collections/TollTransactions.jsx';
 import TollBundles from './collections/TollBundles.jsx';
@@ -24,56 +12,47 @@ import EndOfShift from './collections/EndOfShift.jsx';
 const tabs = [
     {
         key: 'tolls',
-        label: 'Tolls',
-        icon: <Receipt size={16} />,
+        label: 'Toll',
         content: <TollTransactions />,
     },
     {
         key: 'bundles',
-        label: 'Bundles',
-        icon: <Package size={16} />,
+        label: 'Bundle',
         content: <TollBundles />,
     },
     {
         key: 'prepayments',
-        label: 'Prepayments',
-        icon: <Wallet size={16} />,
+        label: 'Prepayment',
         content: <TopUps />,
     },
     {
         key: 'advertisements',
-        label: 'Advertisements',
-        icon: <Megaphone size={16} />,
+        label: 'Advertisement',
         content: <AdvertsBilling />,
     },
     {
         key: 'events',
-        label: 'Events',
-        icon: <Calendar size={16} />,
+        label: 'Event',
         content: <EventPayments />,
     },
     {
         key: 'incidents',
-        label: 'Incidents',
-        icon: <AlertTriangle size={16} />,
+        label: 'Incident',
         content: <IncidentFine />,
     },
     {
         key: 'overloads',
-        label: 'Overloads',
-        icon: <Scale size={16} />,
+        label: 'Overload',
         content: <OverloadFines />,
     },
     {
         key: 'fineCharges',
-        label: 'Fine Charge Billing',
-        icon: <Gavel size={16} />,
+        label: 'Fine',
         content: <FineChargeBilling />,
     },
     {
         key: 'endOfShift',
-        label: 'End of Shift',
-        icon: <Clock size={16} />,
+        label: 'End-of-shift',
         content: <EndOfShift />,
     },
 ];

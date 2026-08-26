@@ -152,12 +152,12 @@ export default function CreateEndOfShiftBillModal({
         destroyOnHidden
         title={null}
         closable={false}
-        maskClosable={!loading && !submitting}
-        keyboard={!loading && !submitting}
+        maskClosable={false}
+        keyboard={false}
         className="brand-modal"
         styles={{ body: { padding: 0 }, content: { padding: 0, overflow: 'hidden' } }}
       >
-        <BrandModalHeader title="Shift Collection Billing" onClose={closeModal} />
+        <BrandModalHeader title="Bill" onClose={closeModal} />
         <div className="px-6 py-5">
           {loading ? (
             <p className="py-8 text-center text-sm text-slate-500">Loading shift billing details…</p>

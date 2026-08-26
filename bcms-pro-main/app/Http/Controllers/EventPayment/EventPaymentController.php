@@ -439,7 +439,11 @@ class EventPaymentController extends BasicController
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            return $this->sendError('Failed to create event bill. Please try again or contact support.');
+            return $this->sendError(
+                config('app.debug')
+                    ? 'Failed to create event bill: ' . $e->getMessage()
+                    : 'Failed to create event bill. Please try again or contact support.'
+            );
         }
     }
 
@@ -492,6 +496,13 @@ class EventPaymentController extends BasicController
 
     private function cancelBillWithGateway(string $paymentRef): array
     {
+        if (GePG::shouldStubLocally()) {
+            Log::warning('GePG URL is not configured; skipping remote event bill cancellation', [
+                'payment_ref' => $paymentRef,
+            ]);
+            return ['success' => true];
+        }
+
         try {
             $response = Http::delete(EnvironmentHelper::GePGBaseUrl() . '/bills/' . $paymentRef);
             if (!$response->successful()) {

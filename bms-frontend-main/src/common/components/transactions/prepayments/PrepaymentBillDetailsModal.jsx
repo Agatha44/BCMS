@@ -46,16 +46,10 @@ const buildBillId = (bill) => {
 };
 
 const billStatusTag = (bill) => {
-    if (bill?.is_cancelled != null && bill.is_cancelled !== false) {
-        return {color: 'red', label: 'Cancelled'};
-    }
-    const raw = String(bill?.bill_status ?? '').trim();
-    const lower = raw.toLowerCase();
-    if (lower === 'paid') return {color: 'green', label: 'Paid'};
-    if (lower === 'unpaid' || lower === 'pending') return {color: 'gold', label: raw || 'Unpaid'};
-    if (lower === 'expired') return {color: 'volcano', label: 'Expired'};
-    if (lower === 'cancelled') return {color: 'red', label: 'Cancelled'};
-    return {color: 'default', label: raw || EMPTY_VALUE};
+    const raw = String(bill?.bill_status ?? '').trim().toUpperCase();
+    if (raw === 'CANCELLED' || Number(bill?.is_cancelled) === 1) return {color: 'red', label: 'Cancelled'};
+    if (raw === 'PAID') return {color: 'green', label: 'PAID'};
+    return {color: 'gold', label: 'PENDING'};
 };
 
 const ReadOnlyField = ({label, value, mono = false}) => (
@@ -109,9 +103,7 @@ export default function PrepaymentBillDetailsModal({
 
     const anyLoading = cancelSubmitting || loadingRepost;
 
-    const isCancelled =
-        (bill?.is_cancelled != null && bill.is_cancelled !== false) ||
-        String(bill?.bill_status ?? '').trim().toLowerCase() === 'cancelled';
+    const isCancelled = Number(bill?.is_cancelled) === 1;
 
     const summary = useMemo(() => {
         if (!bill) return null;

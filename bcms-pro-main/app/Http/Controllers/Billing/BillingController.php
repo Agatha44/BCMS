@@ -1796,38 +1796,44 @@ class BillingController extends BasicController
 
         // Call GePG API to cancel the bill
         $billId = $bill_details['bill_id'];
-        $url_path = EnvironmentHelper::GePGBaseUrl() . '/bills/' . $billId;
 
-        Log::info('Calling GePG API for bill cancellation', [
-            'url' => $url_path,
-            'bill_id' => $billId
-        ]);
+        if (GePG::shouldStubLocally()) {
+            Log::warning('GePG URL is not configured; cancelling bill locally', ['bill_id' => $billId]);
+            $cancelBill = ['message' => 'Successful'];
+        } else {
+            $url_path = EnvironmentHelper::GePGBaseUrl() . '/bills/' . $billId;
 
-        try {
-            $response = Http::delete($url_path);
-
-            Log::info('GePG cancellation response', [
-                'status_code' => $response->status(),
-                'response_body' => $response->body(),
-                'response_json' => $response->json()
+            Log::info('Calling GePG API for bill cancellation', [
+                'url' => $url_path,
+                'bill_id' => $billId
             ]);
 
-            if ($response->successful()) {
-                $cancelBill = $response->json();
-            } else {
-                Log::error('GePG cancellation failed', [
+            try {
+                $response = Http::delete($url_path);
+
+                Log::info('GePG cancellation response', [
                     'status_code' => $response->status(),
-                    'response' => $response->body()
+                    'response_body' => $response->body(),
+                    'response_json' => $response->json()
                 ]);
-                return response()->json(['status' => 2, 'message' => 'GePG API call failed. Status: ' . $response->status()]);
+
+                if ($response->successful()) {
+                    $cancelBill = $response->json();
+                } else {
+                    Log::error('GePG cancellation failed', [
+                        'status_code' => $response->status(),
+                        'response' => $response->body()
+                    ]);
+                    return response()->json(['status' => 2, 'message' => 'GePG API call failed. Status: ' . $response->status()]);
+                }
+            } catch (\Exception $e) {
+                Log::error('GePG cancellation exception', [
+                    'error' => $e->getMessage(),
+                    'bill_id' => $billId,
+                    'trace' => $e->getTraceAsString()
+                ]);
+                return response()->json(['status' => 2, 'message' => 'Payment gateway request failed. Please try again or contact support.']);
             }
-        } catch (\Exception $e) {
-            Log::error('GePG cancellation exception', [
-                'error' => $e->getMessage(),
-                'bill_id' => $billId,
-                'trace' => $e->getTraceAsString()
-            ]);
-            return response()->json(['status' => 2, 'message' => 'Payment gateway request failed. Please try again or contact support.']);
         }
 
         if (isset($cancelBill['message']) && ($cancelBill['message'] == 7204 || $cancelBill['message'] == 'Successful')) {
@@ -2446,7 +2452,16 @@ class BillingController extends BasicController
 
             // Handle GePG response based on the actual response structure
             if (isset($gepgResponse['data']) && is_array($gepgResponse['data'])) {
-                // Success case - GePG returned data
+                $controlNum = $gepgResponse['control_num']
+                    ?? ($gepgResponse['data']['control_num'] ?? $gepgResponse['data']['contr_num'] ?? null);
+
+                $updateData = ['t_status' => 'SP', 'updated_at' => now()];
+                if (!empty($controlNum)) {
+                    $updateData['contr_num'] = $controlNum;
+                }
+
+                DB::table('top_up')->where('id', $topUp)->update($updateData);
+
                 $getBilldata = DB::table('top_up')->where('id', $topUp)->first();
                 DB::commit();
 
@@ -2455,7 +2470,7 @@ class BillingController extends BasicController
                 return $this->sendResponse([
                     'bill_id' => $topUp,
                     'bill_amount' => $validatedData['bill_amount'],
-                    'control_number' => $getBilldata->contr_num ?? 0,
+                    'control_number' => $getBilldata->contr_num ?? $controlNum ?? 0,
                     'gepg_response' => $gepgResponse['data']
                 ], 'Control Number Request Successfully Sent');
             } else {

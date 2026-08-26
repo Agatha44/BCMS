@@ -53,22 +53,19 @@ class TopUpController extends ConfigurationController
 
         $paginator->getCollection()->transform(function ($t) {
             $isCancelled = (int) ($t->is_cancelled ?? 0) === 1;
-            $isPaid = !is_null($t->trx_dt_tm) || !empty($t->psp_receipt_num);
+            $hasReceipt = $this->hasPaymentReceipt($t->psp_receipt_num ?? null);
+            $isPaid = $hasReceipt || !empty($t->trx_dt_tm);
 
             if ($isCancelled) {
                 $t->bill_status = 'CANCELLED';
-            } elseif ($isPaid) {
-                $t->bill_status = 'PAID';
-            } elseif (!is_null($t->bill_exp_dt) && now()->greaterThan($t->bill_exp_dt)) {
-                $t->bill_status = 'EXPIRED';
+                $t->psp_receipt_num = null;
             } else {
-                $t->bill_status = 'UNPAID';
+                $t->bill_status = $hasReceipt ? 'PAID' : 'PENDING';
             }
-
             $t->source = $t->source ?? 'TUP';
             $t->can_cancel = !$isCancelled && !$isPaid;
             $t->can_repost = !$isCancelled && !$isPaid;
-            $t->can_print = !empty($t->psp_receipt_num) || !is_null($t->trx_dt_tm);
+            $t->can_print = !$isCancelled && $hasReceipt;
 
             return $t;
         });
@@ -404,17 +401,9 @@ class TopUpController extends ConfigurationController
     private function formatTopUpBillRow(object $bill): array
     {
         $isCancelled = (int) ($bill->is_cancelled ?? 0) === 1;
-        $isPaid = !empty($bill->trx_dt_tm) || !empty($bill->psp_receipt_num);
-
-        if ($isCancelled) {
-            $billStatus = 'CANCELLED';
-        } elseif ($isPaid) {
-            $billStatus = 'PAID';
-        } elseif (!is_null($bill->bill_exp_dt) && now()->greaterThan($bill->bill_exp_dt)) {
-            $billStatus = 'EXPIRED';
-        } else {
-            $billStatus = 'UNPAID';
-        }
+        $hasReceipt = $this->hasPaymentReceipt($bill->psp_receipt_num ?? null);
+        $isPaid = $hasReceipt || !empty($bill->trx_dt_tm);
+        $billStatus = $isCancelled ? 'CANCELLED' : ($hasReceipt ? 'PAID' : 'PENDING');
 
         return [
             'id' => $bill->id,
@@ -427,8 +416,8 @@ class TopUpController extends ConfigurationController
             'gepg_control_number' => $bill->contr_num,
             'api_control_number' => $bill->contr_num,
             'pay_ref_id' => $bill->pay_ref_id ?? null,
-            'psp_receipt_num' => $bill->psp_receipt_num ?? null,
-            'receipt_number' => $bill->receipt_number ?? null,
+            'psp_receipt_num' => $isCancelled ? null : ($bill->psp_receipt_num ?? null),
+            'receipt_number' => $isCancelled ? null : ($bill->receipt_number ?? null),
             'payment_date' => $bill->payment_date ?? null,
             'trx_dt_tm' => $bill->trx_dt_tm ?? null,
             'paid_amt' => isset($bill->paid_amt) ? (float) $bill->paid_amt : null,
@@ -441,8 +430,18 @@ class TopUpController extends ConfigurationController
             'bill_cancel_date' => $bill->bill_cancel_date ?? null,
             'can_cancel' => !$isCancelled && !$isPaid,
             'can_repost' => !$isCancelled && !$isPaid,
-            'can_print' => $isPaid,
+            'can_print' => !$isCancelled && $hasReceipt,
         ];
+    }
+
+    private function hasPaymentReceipt(?string $receipt): bool
+    {
+        $receipt = trim((string) $receipt);
+        if ($receipt === '') {
+            return false;
+        }
+
+        return stripos($receipt, 'CANC') !== 0;
     }
 
     private function numberToWords($number)

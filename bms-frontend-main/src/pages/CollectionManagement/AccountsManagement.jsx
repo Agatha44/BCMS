@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { AlertCircle, Edit, Eye, ToggleLeft, ToggleRight, Save, Car, Receipt, Wallet, Package, Phone, Mail, Hash, Plus, Copy, CheckCircle2, Link2, Unlink, ImageOff, ShieldCheck } from 'lucide-react';
+import { AlertCircle, Edit, Eye, ToggleLeft, ToggleRight, Save, Receipt, Package, Phone, Mail, Hash, Plus, Copy, CheckCircle2, Link2, Unlink, ImageOff, ShieldCheck } from 'lucide-react';
 import { Modal, Button, Tabs, Select, Tag, Empty, Form, Input, InputNumber, Radio, Spin, AutoComplete, message as antMessage } from 'antd';
 import Swal from 'sweetalert2';
 
@@ -45,6 +45,16 @@ const formatShortDate = (value) => {
   if (Number.isNaN(d.getTime())) return null;
   return d.toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 };
+
+const fireSwalAboveModals = (options) =>
+  Swal.fire({
+    ...options,
+    didOpen: (popup) => {
+      if (typeof options.didOpen === 'function') options.didOpen(popup);
+      const container = popup?.closest?.('.swal2-container');
+      if (container) container.style.zIndex = '3000';
+    },
+  });
 
 const formatStaffVehicleApiError = (res) => {
   if (!res || res.success) return '';
@@ -155,7 +165,6 @@ export default function AccountsManagement() {
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [otpCode, setOtpCode] = useState('');
   const [otpMaskedPhone, setOtpMaskedPhone] = useState('');
-  const [otpDevCode, setOtpDevCode] = useState('');
   const [sendingOtp, setSendingOtp] = useState(false);
   const [verifyingOtp, setVerifyingOtp] = useState(false);
   const [otpResendIn, setOtpResendIn] = useState(0);
@@ -327,7 +336,6 @@ export default function AccountsManagement() {
   const openCreateModal = () => {
     setCreateForm(EMPTY_CREATE_FORM);
     setOtpCode('');
-    setOtpDevCode('');
     setOtpMaskedPhone('');
     setShowOtpModal(false);
     setShowCreateModal(true);
@@ -353,7 +361,6 @@ export default function AccountsManagement() {
     }
     const data = response.data || {};
     setOtpMaskedPhone(data.phone || createForm.phone);
-    setOtpDevCode(data.otp ? String(data.otp) : '');
     setOtpCode('');
     startOtpResendTimer();
     setShowOtpModal(true);
@@ -385,7 +392,7 @@ export default function AccountsManagement() {
     try {
       await requestCreateAccountOtp();
     } catch (err) {
-      await Swal.fire({
+      await fireSwalAboveModals({
         icon: 'error',
         title: 'Error!',
         text: formatStaffVehicleApiError(err) || err?.message || 'Failed to resend OTP',
@@ -397,7 +404,7 @@ export default function AccountsManagement() {
 
   const handleVerifyOtpAndCreate = async () => {
     if (!otpCode || otpCode.length !== 6) {
-      await Swal.fire({
+      await fireSwalAboveModals({
         icon: 'warning',
         title: 'Enter OTP',
         text: 'Please enter the 6-digit code sent to the phone number.',
@@ -420,7 +427,6 @@ export default function AccountsManagement() {
         setShowCreateModal(false);
         setCreateForm(EMPTY_CREATE_FORM);
         setOtpCode('');
-        setOtpDevCode('');
         await Swal.fire({
           icon: 'success',
           title: 'Account created',
@@ -432,14 +438,14 @@ export default function AccountsManagement() {
         });
         fetchAccounts();
       } else {
-        await Swal.fire({
+        await fireSwalAboveModals({
           icon: 'error',
           title: 'Error!',
           text: formatStaffVehicleApiError(response) || response.message || 'Failed to create account',
         });
       }
     } catch (err) {
-      await Swal.fire({
+      await fireSwalAboveModals({
         icon: 'error',
         title: 'Error!',
         text: formatStaffVehicleApiError(err) || err?.message || 'An error occurred while creating account',
@@ -1684,7 +1690,7 @@ export default function AccountsManagement() {
           rightAction={
             <button
               type="button"
-              className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
               style={{ backgroundColor: BRAND }}
               onMouseEnter={(e) => {
                 if (!e.currentTarget.disabled) e.currentTarget.style.backgroundColor = BRAND_DARK;
@@ -1695,8 +1701,7 @@ export default function AccountsManagement() {
               onClick={openCreateModal}
               disabled={showCreateModal || creating}
             >
-              <Plus size={16} />
-              <span>New Account</span>
+              Create
             </button>
           }
         />
@@ -1719,7 +1724,7 @@ export default function AccountsManagement() {
         <BrandModalHeader title="Create Account" onClose={() => !creating && !showOtpModal && setShowCreateModal(false)} />
 
         <form id="create-account-form" onSubmit={handleCreateAccount} className="px-6 py-5">
-          <Section title="Account Holder">
+          <Section title="Personal">
             <div className="grid grid-cols-1 gap-x-6 gap-y-4 md:grid-cols-2">
               <div>
                 <label className="mb-1.5 block text-xs font-semibold tracking-[0.01em]" style={{ color: BRAND }}>NIDA</label>
@@ -1801,14 +1806,13 @@ export default function AccountsManagement() {
             type="primary"
             htmlType="submit"
             form="create-account-form"
-            icon={<Plus size={14} />}
             loading={sendingOtp}
             disabled={sendingOtp || showOtpModal}
             style={{ backgroundColor: BRAND, borderColor: BRAND }}
             onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = BRAND_DARK; e.currentTarget.style.borderColor = BRAND_DARK; }}
             onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = BRAND; e.currentTarget.style.borderColor = BRAND; }}
           >
-            Create Account
+            Create
           </Button>
           <Button onClick={() => setShowCreateModal(false)} disabled={sendingOtp || showOtpModal}>Close</Button>
         </div>
@@ -1837,7 +1841,13 @@ export default function AccountsManagement() {
         <div className="px-6 py-5">
           <p className="text-sm text-black">
             OTP is sent to{' '}
-            <span className="font-semibold">{ createForm.phone }</span>.
+            <span className="font-semibold">{otpMaskedPhone || createForm.phone}</span>.
+            {createForm.email ? (
+              <>
+                {' '}If SMS does not arrive, check{' '}
+                <span className="font-semibold">{createForm.email}</span>.
+              </>
+            ) : null}
           </p>
          
           <div className="mt-5 flex justify-center">
@@ -1869,7 +1879,7 @@ export default function AccountsManagement() {
         <div className="flex items-center justify-end gap-2 border-t border-slate-200 bg-white px-6 py-3">
           <Button
             type="primary"
-            icon={<ShieldCheck size={14} />}
+          
             loading={verifyingOtp}
             disabled={verifyingOtp || sendingOtp || otpCode.length !== 6}
             onClick={handleVerifyOtpAndCreate}
@@ -2107,7 +2117,7 @@ export default function AccountsManagement() {
                   key: 'vehicles',
                   label: (
                     <span className="inline-flex items-center gap-1.5 text-sm font-medium">
-                      <Car size={14} /> Vehicles
+                      Vehicles
                       {viewVehicles.length > 0 && (
                         <Tag color="#962E32" className="!ml-1 !mr-0">{viewVehicles.length}</Tag>
                       )}
@@ -2118,27 +2128,21 @@ export default function AccountsManagement() {
                 {
                   key: 'passages',
                   label: (
-                    <span className="inline-flex items-center gap-1.5 text-sm font-medium">
-                      <Receipt size={14} /> Passages
-                              </span>
+                    <span className="text-sm font-medium">Passages</span>
                   ),
                   children: renderPassagesTab(),
                 },
                 {
                   key: 'prepayments',
                   label: (
-                    <span className="inline-flex items-center gap-1.5 text-sm font-medium">
-                      <Wallet size={14} /> Prepayments
-                    </span>
+                    <span className="text-sm font-medium">Prepayments</span>
                   ),
                   children: renderPrepaymentsTab(),
                 },
                 {
                   key: 'bundles',
                   label: (
-                    <span className="inline-flex items-center gap-1.5 text-sm font-medium">
-                      <Package size={14} /> Bundles
-                    </span>
+                    <span className="text-sm font-medium">Bundles</span>
                   ),
                   children: renderBundlesTab(),
                 },

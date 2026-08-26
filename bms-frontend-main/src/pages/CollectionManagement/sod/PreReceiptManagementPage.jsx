@@ -1,13 +1,17 @@
-import { List } from 'lucide-react';
-
 import SoDTabbedPage from './components/SoDTabbedPage.jsx';
+import TollBundles from './collections/TollBundles.jsx';
+import TopUps from './collections/TopUps.jsx';
 
 const tabs = [
   {
-    key: 'all',
-    label: 'All Pre-receipts',
-    icon: <List size={16} />,
-    description: 'Pre-receipt records will appear here once this section is connected.',
+    key: 'bundles',
+    label: 'Bundle',
+    content: <TollBundles />,
+  },
+  {
+    key: 'prepayments',
+    label: 'Prepayment',
+    content: <TopUps />,
   },
 ];
 

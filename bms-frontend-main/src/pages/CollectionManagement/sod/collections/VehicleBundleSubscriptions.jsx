@@ -1,15 +1,12 @@
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import {Button, Tag} from 'antd';
-import {Pencil, Plus} from 'lucide-react';
-import {ReloadOutlined} from '@ant-design/icons';
+import {Pencil} from 'lucide-react';
 
 import DataTable from '../../../../common/data/DataTable.jsx';
 import BundleTransferModal from '../../../../common/components/modals/BundleTransferModal.jsx';
 import {apiService} from '../../../../services/api.jsx';
 import CollectionLoader from '../../components/CollectionLoader.jsx';
 import CollectionTabShell from '../components/CollectionTabShell.jsx';
-import RequestBundleModal from '../components/RequestBundleModal.jsx';
-import BundleBillSuccessModal from '../components/BundleBillSuccessModal.jsx';
 import {
     defaultBundleSubscriptionPagination,
     extractServerPagination,
@@ -38,8 +35,8 @@ const formatBundleDate = (value) => {
 };
 
 /**
- * Lists all bundle subscriptions on load (legacy behaviour) with SoD styling,
- * edit transfer, and request bundle.
+ * Lists all bundle subscriptions on load (legacy behaviour) with SoD styling
+ * and edit transfer.
  */
 export default function VehicleBundleSubscriptions() {
     const [rows, setRows] = useState([]);
@@ -47,9 +44,6 @@ export default function VehicleBundleSubscriptions() {
     const [error, setError] = useState(null);
     const [pagination, setPagination] = useState(defaultPagination);
 
-    const [showBundleModal, setShowBundleModal] = useState(false);
-    const [requestPlateNo, setRequestPlateNo] = useState(null);
-    const [billSuccess, setBillSuccess] = useState(null);
     const [showBundleTransferModal, setShowBundleTransferModal] = useState(false);
     const [selectedSubscription, setSelectedSubscription] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
@@ -114,15 +108,6 @@ export default function VehicleBundleSubscriptions() {
         fetchBundleSubscriptions(1, pagination.per_page, debouncedSearchTerm);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [debouncedSearchTerm]);
-
-    const plateOptions = useMemo(() => {
-        const plates = [
-            ...new Set(
-                rows.map((r) => r.plate_no).filter((p) => p != null && String(p).trim() !== '')
-            ),
-        ];
-        return plates.map((p) => ({value: p, label: p}));
-    }, [rows]);
 
     const columns = useMemo(
         () => [
@@ -265,11 +250,6 @@ export default function VehicleBundleSubscriptions() {
     const refreshList = () =>
         fetchBundleSubscriptions(pagination.current_page, pagination.per_page, debouncedSearchTerm);
 
-    const openRequestBundle = (plateNo = null) => {
-        setRequestPlateNo(plateNo);
-        setShowBundleModal(true);
-    };
-
     return (
         <div className="space-y-4">
             <CollectionTabShell
@@ -304,58 +284,18 @@ export default function VehicleBundleSubscriptions() {
                         }
                         className="sod-vehicle-bundle-subscriptions-table"
                         rightAction={
-                            <div className="flex flex-wrap items-center justify-end gap-4">
-                                <button
-                                    type="button"
-                                    onClick={refreshList}
-                                    className="btn-secondary flex items-center space-x-2 px-3 py-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                    disabled={loading}
-                                >
-                                    <ReloadOutlined className="text-gray-700" />
-                                    <span>Refresh</span>
-                                </button>
-
-                                <Button
-                                    type="primary"
-                                    icon={<Plus size={14} />}
-                                    onClick={() => openRequestBundle()}
-                                    style={{backgroundColor: BRAND, borderColor: BRAND}}
-                                    onMouseEnter={(e) => {
-                                        e.currentTarget.style.backgroundColor = BRAND_DARK;
-                                        e.currentTarget.style.borderColor = BRAND_DARK;
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.currentTarget.style.backgroundColor = BRAND;
-                                        e.currentTarget.style.borderColor = BRAND;
-                                    }}
-                                >
-                                    Request Bundle
-                                </Button>
-                            </div>
+                            <button
+                                type="button"
+                                onClick={refreshList}
+                                className="btn-secondary px-3 py-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                disabled={loading}
+                            >
+                                Refresh
+                            </button>
                         }
                     />
                 </div>
             </CollectionTabShell>
-
-            <RequestBundleModal
-                open={showBundleModal}
-                onClose={() => {
-                    setShowBundleModal(false);
-                    setRequestPlateNo(null);
-                }}
-                initialPlateNo={requestPlateNo}
-                plateOptions={plateOptions}
-                onSuccess={(success) => {
-                    setBillSuccess(success);
-                    refreshList();
-                }}
-            />
-
-            <BundleBillSuccessModal
-                open={!!billSuccess}
-                billSuccess={billSuccess}
-                onClose={() => setBillSuccess(null)}
-            />
 
             <BundleTransferModal
                 isOpen={showBundleTransferModal}

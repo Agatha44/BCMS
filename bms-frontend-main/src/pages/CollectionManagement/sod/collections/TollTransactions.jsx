@@ -1,17 +1,11 @@
 import {useEffect, useMemo, useState} from 'react';
-import {AlertCircle, Download} from 'lucide-react';
-import {ReloadOutlined} from '@ant-design/icons';
-import Swal from 'sweetalert2';
-import * as XLSX from 'xlsx';
-import {saveAs} from 'file-saver';
+import {AlertCircle} from 'lucide-react';
 
 import DataTable from '../../../../common/data/DataTable.jsx';
 import CollectionLoader from '../../components/CollectionLoader.jsx';
 import {tollService} from '../../../../services/tollService.js';
 import {formatMoney} from '../../../../common/utils/numberFormat.js';
 
-const BRAND = '#962E32';
-const BRAND_DARK = '#7A2326';
 const EMPTY_VALUE = 'N/A';
 
 const extractRowsAndPagination = (payload) => {
@@ -55,7 +49,6 @@ export default function TollTransactions() {
     });
 
     const [isInitialLoad, setIsInitialLoad] = useState(true);
-    const [exporting, setExporting] = useState(false);
 
     const fetchTollTransactions = async () => {
         setLoading(true);
@@ -135,54 +128,6 @@ export default function TollTransactions() {
     };
 
     const handleSearch = (searchTerm) => handleFilterChange('search', searchTerm);
-
-    const exportToExcel = async () => {
-        setExporting(true);
-        try {
-            const exportData = rows.map((r, index) => ({
-                'Serial No.': index + 1,
-                'Plate No.': r.plate_no || '',
-                'Lane No.': r.lane_id || '',
-                'Pass Time': r.created_at || '',
-                'Receipt No.': r.receipt_num || '',
-                Amount: r.charged_amount ?? '',
-                Status: r.status || '',
-                'Payment Method': r.trans_type || '',
-            }));
-
-            const workbook = XLSX.utils.book_new();
-            const worksheet = XLSX.utils.json_to_sheet(exportData);
-            XLSX.utils.book_append_sheet(workbook, worksheet, 'Toll Transactions');
-
-            const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
-            const filename = `toll_transactions_${timestamp}.xlsx`;
-            const excelBuffer = XLSX.write(workbook, {bookType: 'xlsx', type: 'array'});
-            saveAs(
-                new Blob([excelBuffer], {
-                    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                }),
-                filename
-            );
-
-            await Swal.fire({
-                icon: 'success',
-                title: 'Export Successful!',
-                text: `Exported to ${filename}`,
-                timer: 2500,
-                showConfirmButton: false,
-            });
-        } catch (err) {
-            // eslint-disable-next-line no-console
-            console.error('Export error:', err);
-            await Swal.fire({
-                icon: 'error',
-                title: 'Export Failed',
-                text: 'An error occurred while exporting. Please try again.',
-            });
-        } finally {
-            setExporting(false);
-        }
-    };
 
     const columns = useMemo(
         () => [
@@ -305,38 +250,14 @@ export default function TollTransactions() {
                     searchPlaceholder="Search transactions by plate number, receipt..."
                     showRefresh={false}
                     rightAction={
-                        <div className="flex flex-wrap items-center gap-4">
-                            <button
-                                type="button"
-                                onClick={fetchTollTransactions}
-                                className="btn-secondary flex items-center space-x-2 px-3 py-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                disabled={loading}
-                            >
-                                <ReloadOutlined className="text-gray-700" />
-                                <span>Refresh</span>
-                            </button>
-
-                            <button
-                                type="button"
-                                onClick={exportToExcel}
-                                disabled={exporting || rows.length === 0}
-                                className="flex items-center space-x-2 rounded-lg px-4 py-2 text-white disabled:cursor-not-allowed disabled:opacity-50"
-                                style={{backgroundColor: BRAND}}
-                                onMouseEnter={(e) => {
-                                    if (!e.currentTarget.disabled) {
-                                        e.currentTarget.style.backgroundColor = BRAND_DARK;
-                                    }
-                                }}
-                                onMouseLeave={(e) => {
-                                    if (!e.currentTarget.disabled) {
-                                        e.currentTarget.style.backgroundColor = BRAND;
-                                    }
-                                }}
-                            >
-                                <Download size={16} />
-                                <span>{exporting ? 'Exporting...' : 'Export'}</span>
-                            </button>
-                        </div>
+                        <button
+                            type="button"
+                            onClick={fetchTollTransactions}
+                            className="btn-secondary px-3 py-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            disabled={loading}
+                        >
+                            Refresh
+                        </button>
                     }
                 />
             </div>

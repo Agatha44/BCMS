@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AlertCircle, CheckCircle2, Copy, Eye, Plus, Receipt } from 'lucide-react';
-import { ReloadOutlined } from '@ant-design/icons';
+import { AlertCircle, CheckCircle2, Copy } from 'lucide-react';
 import { AutoComplete, Button, Form, Input, InputNumber, Modal, Spin, Tag, message as antMessage } from 'antd';
 import PropTypes from 'prop-types';
 import Swal from 'sweetalert2';
@@ -87,15 +86,23 @@ const extractPagination = (payload, requestedPage, requestedPerPage) => {
   };
 };
 
+const hasPaymentReceipt = (value) => {
+  const receipt = String(value ?? '').trim();
+  if (!receipt || receipt === '-' || receipt === 'N/A') return false;
+  return !receipt.toUpperCase().startsWith('CANC');
+};
+
 const normalizeRow = (row = {}) => {
   // Strict mapping (no fallbacks) based on provided API response fields.
   const account = row.account_no ?? '-';
   const customer = row.cust_name ?? '-';
   const amount = formatMoney(row.bill_amount);
   const control = row.contr_num ?? '-';
-  const receipt = row.psp_receipt_num ?? '-';
-  const status = row.bill_status ?? '-';
-  const isCancelled = row.is_cancelled;
+  const paid = hasPaymentReceipt(row.psp_receipt_num);
+  const isCancelled = Number(row.is_cancelled) === 1
+    || String(row.bill_status || '').toUpperCase() === 'CANCELLED';
+  const receipt = !isCancelled && paid ? row.psp_receipt_num : '-';
+  const status = isCancelled ? 'CANCELLED' : (paid ? 'PAID' : 'PENDING');
 
   return {
     ...row,
@@ -115,6 +122,8 @@ const extractControlNumber = (data = {}) =>
   data.gepg_control_number ||
   data.api_control_number ||
   data.contr_num ||
+  data.gepg_response?.control_num ||
+  data.gepg_response?.contr_num ||
   null;
 
 export default function TopUps() {
@@ -386,15 +395,8 @@ export default function TopUps() {
         align: 'center',
         render: (_, r) => {
           const status = String(r.status_display || '').toUpperCase();
-          const isCancelled = r.is_cancelled_display != null && r.is_cancelled_display !== false;
-          const label = isCancelled
-            ? 'Cancelled'
-            : status === 'PAID'
-              ? 'Paid'
-              : status === 'PENDING'
-                ? 'Pending'
-                : status || EMPTY_VALUE;
-          const color = isCancelled ? 'red' : status === 'PAID' ? 'green' : status === 'PENDING' ? 'gold' : 'default';
+          const label = status === 'CANCELLED' ? 'Cancelled' : status === 'PAID' ? 'PAID' : 'PENDING';
+          const color = status === 'CANCELLED' ? 'red' : status === 'PAID' ? 'green' : 'gold';
 
           return (
             <Tag color={color} className="!m-0 px-2.5 py-0.5 text-xs font-medium">
@@ -422,7 +424,6 @@ export default function TopUps() {
               }}
               onClick={() => openDetails(r)}
             >
-              <Eye size={14} />
               View
             </button>
           </div>
@@ -494,17 +495,16 @@ export default function TopUps() {
                 <button
                   type="button"
                   onClick={refreshList}
-                  className="btn-secondary flex items-center space-x-2 px-3 py-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="btn-secondary px-3 py-2 disabled:cursor-not-allowed disabled:opacity-50"
                   disabled={loading}
                 >
-                  <ReloadOutlined className="text-gray-700" />
-                  <span>Refresh</span>
+                  Refresh
                 </button>
 
                 <button
                   type="button"
                   onClick={openTopUpModal}
-                  className="flex items-center space-x-2 rounded-lg px-4 py-2 text-white disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-lg px-4 py-2 text-white disabled:cursor-not-allowed disabled:opacity-50"
                   style={{ backgroundColor: BRAND }}
                   onMouseEnter={(e) => {
                     if (!e.currentTarget.disabled) e.currentTarget.style.backgroundColor = BRAND_DARK;
@@ -513,8 +513,7 @@ export default function TopUps() {
                     if (!e.currentTarget.disabled) e.currentTarget.style.backgroundColor = BRAND;
                   }}
                 >
-                  <Plus size={16} />
-                  <span>Request Top-up</span>
+                  Top-up
                 </button>
               </div>
             }
@@ -531,12 +530,12 @@ export default function TopUps() {
         destroyOnHidden
         title={null}
         closable={false}
-        maskClosable={!creatingTopUp}
-        keyboard={!creatingTopUp}
+        maskClosable={false}
+        keyboard={false}
         className="brand-modal"
         styles={{ body: { padding: 0 }, content: { padding: 0, overflow: 'hidden' } }}
       >
-        <BrandModalHeader title="Request Top-up" onClose={closeTopUpModal} />
+        <BrandModalHeader title="Top up" onClose={closeTopUpModal} />
         <Form
           id="manage-collection-topup-form"
           form={topUpForm}
@@ -622,10 +621,9 @@ export default function TopUps() {
               type="primary"
               htmlType="submit"
               loading={creatingTopUp}
-              icon={<Receipt size={14} />}
               style={{ backgroundColor: BRAND, borderColor: BRAND }}
             >
-              Request Top-up
+              Request
             </Button>
             <Button onClick={closeTopUpModal} disabled={creatingTopUp}>Close</Button>
           </div>

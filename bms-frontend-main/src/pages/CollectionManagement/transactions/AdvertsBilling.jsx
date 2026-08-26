@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { AlertCircle, CheckCircle2, Copy, Eye, Plus } from 'lucide-react';
-import { ReloadOutlined } from '@ant-design/icons';
+import { AlertCircle, CheckCircle2, Copy } from 'lucide-react';
 import { Button, Modal, Tag, message as antMessage } from 'antd';
 import PropTypes from 'prop-types';
 
@@ -94,13 +93,28 @@ BrandModalHeader.propTypes = {
   onClose: PropTypes.func.isRequired,
 };
 
+const hasPaymentReceipt = (value) => {
+  const receipt = String(value ?? '').trim();
+  if (!receipt || receipt === '-' || receipt === 'N/A') return false;
+  const upper = receipt.toUpperCase();
+  return !upper.startsWith('CANC') && !upper.startsWith('BILL FAILED') && !upper.startsWith('BILL EXPIRED');
+};
+
 const normalizeRow = (row = {}) => {
   const customer = row.payer_name ?? row.cust_name ?? row.customer ?? row.customer_name ?? '-';
   const control = row.contr_num ?? row.control_number ?? row.control_num ?? '-';
-  const receipt = row.psp_receipt_num ?? row.receipt_number ?? row.receipt ?? '-';
+  const receiptRaw = row.psp_receipt_num ?? row.receipt_number ?? row.receipt ?? '';
+  const paid = hasPaymentReceipt(receiptRaw);
+  const isCancelled =
+    !paid &&
+    (Number(row.is_cancelled) === 1 || String(row.bill_status || '').toUpperCase() === 'CANCELLED');
+  const receipt = paid ? receiptRaw : '-';
   const amount = row.bill_amount ?? row.amount ?? row.amount_collected ?? row.amountCollected;
-  const status = row.bill_status ?? row.status ?? row.status_text ?? '';
-  const isCancelled = row.is_cancelled ?? row.is_cancelled_display ?? null;
+  const status = paid
+    ? 'PAID'
+    : isCancelled
+      ? 'CANCELLED'
+      : String(row.bill_status ?? row.status ?? row.status_text ?? '').toUpperCase();
 
   return {
     ...row,
@@ -108,7 +122,7 @@ const normalizeRow = (row = {}) => {
     control_display: control,
     receipt_display: receipt,
     amount_display: formatMoney(amount),
-    status_display: String(status || '').toUpperCase(),
+    status_display: status,
     is_cancelled_display: isCancelled,
     generated_at_display: formatDate(row.bill_generated_at ?? row.bill_gen_at),
   };
@@ -239,16 +253,16 @@ export default function AdvertsBilling() {
         key: 'status',
         align: 'center',
         render: (_, r) => {
-          const isCancelled = r.is_cancelled_display != null && r.is_cancelled_display !== false;
-          const status = isCancelled ? 'CANCELLED' : String(r.status_display || '').toUpperCase();
-          const label = isCancelled
-            ? 'Cancelled'
-            : status === 'PAID'
-              ? 'Paid'
-              : status === 'PENDING' || status === '1'
-                ? 'Pending'
-                : status || EMPTY_VALUE;
-          const color = isCancelled ? 'red' : status === 'PAID' ? 'green' : 'gold';
+          const status = String(r.status_display || '').toUpperCase();
+          const label =
+            status === 'CANCELLED'
+              ? 'Cancelled'
+              : status === 'PAID'
+                ? 'PAID'
+                : status === 'PENDING' || status === '1'
+                  ? 'Pending'
+                  : status || EMPTY_VALUE;
+          const color = status === 'CANCELLED' ? 'red' : status === 'PAID' ? 'green' : 'gold';
 
           return (
             <Tag color={color} className="!m-0 px-2.5 py-0.5 text-xs font-medium">
@@ -276,7 +290,6 @@ export default function AdvertsBilling() {
               }}
               onClick={() => openDetails(r)}
             >
-              <Eye size={14} />
               View
             </button>
           </div>
@@ -350,11 +363,10 @@ export default function AdvertsBilling() {
                 <button
                   type="button"
                   onClick={refreshList}
-                  className="btn-secondary flex items-center space-x-2 px-3 py-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="btn-secondary px-3 py-2 disabled:cursor-not-allowed disabled:opacity-50"
                   disabled={loading}
                 >
-                  <ReloadOutlined className="text-gray-700" />
-                  <span>Refresh</span>
+                  Refresh
                 </button>
 
                 <button
@@ -369,8 +381,7 @@ export default function AdvertsBilling() {
                   }}
                   onClick={() => setShowCreateModal(true)}
                 >
-                  <Plus size={16} />
-                  <span>Request Advert Bill</span>
+                  <span>Bill</span>
                 </button>
               </div>
             }

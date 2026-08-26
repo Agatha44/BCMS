@@ -255,8 +255,8 @@ const RequestBundleModal = ({
             destroyOnHidden
             title={null}
             closable={false}
-            maskClosable={!creatingBundle}
-            keyboard={!creatingBundle}
+            maskClosable={false}
+            keyboard={false}
             className="brand-modal"
             styles={{body: {padding: 0}, content: {padding: 0, overflow: 'hidden'}}}
         >

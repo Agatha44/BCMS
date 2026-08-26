@@ -47,15 +47,18 @@ const buildBillId = (bill) => {
 };
 
 const billStatusTag = (bill) => {
-    if (bill?.is_cancelled != null && bill.is_cancelled !== false) {
-        return {color: 'red', label: 'Cancelled'};
-    }
-    const raw = String(bill?.bill_status ?? bill?.status ?? '').trim();
-    const lower = raw.toLowerCase();
-    if (lower === 'paid') return {color: 'green', label: 'Paid'};
-    if (lower === 'unpaid' || lower === 'pending' || lower === '1') return {color: 'gold', label: 'Pending'};
-    if (lower === 'expired') return {color: 'volcano', label: 'Expired'};
-    if (lower === 'cancelled') return {color: 'red', label: 'Cancelled'};
+    const receipt = String(bill?.psp_receipt_num ?? bill?.receipt_number ?? '').trim();
+    const hasReceipt =
+        receipt &&
+        receipt !== '-' &&
+        !receipt.toUpperCase().startsWith('CANC') &&
+        !receipt.toUpperCase().startsWith('BILL FAILED') &&
+        !receipt.toUpperCase().startsWith('BILL EXPIRED');
+    const raw = String(bill?.bill_status ?? bill?.status ?? '').trim().toUpperCase();
+    if (hasReceipt || raw === 'PAID') return {color: 'green', label: 'PAID'};
+    if (Number(bill?.is_cancelled) === 1 || raw === 'CANCELLED') return {color: 'red', label: 'Cancelled'};
+    if (raw === 'UNPAID' || raw === 'PENDING' || raw === '1') return {color: 'gold', label: 'Pending'};
+    if (raw === 'EXPIRED') return {color: 'volcano', label: 'Expired'};
     return {color: 'default', label: raw || EMPTY_VALUE};
 };
 
@@ -112,9 +115,8 @@ export default function AdvertBillDetailsModal({
 
     const anyLoading = cancelSubmitting || loadingOrderForm;
 
-    const isCancelled =
-        (bill?.is_cancelled != null && bill.is_cancelled !== false) ||
-        String(bill?.bill_status ?? bill?.status ?? '').trim().toLowerCase() === 'cancelled';
+    const isCancelled = Number(bill?.is_cancelled) === 1
+        || String(bill?.bill_status ?? bill?.status ?? '').trim().toLowerCase() === 'cancelled';
 
     const status = useMemo(
         () => String(bill?.bill_status ?? bill?.status ?? '').trim().toUpperCase(),

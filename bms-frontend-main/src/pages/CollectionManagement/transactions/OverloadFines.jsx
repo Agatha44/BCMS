@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Eye, Plus, X } from 'lucide-react';
-import { ReloadOutlined } from '@ant-design/icons';
+import { X } from 'lucide-react';
 import { Select, Tag } from 'antd';
 import Swal from 'sweetalert2';
 
@@ -228,7 +227,6 @@ export default function OverloadFines() {
                 e.currentTarget.style.backgroundColor = BRAND;
               }}
             >
-              <Eye size={14} />
               View
             </button>
           </div>
@@ -329,15 +327,14 @@ export default function OverloadFines() {
                 type="button"
                 onClick={() => loadOverloads()}
                 disabled={loading}
-                className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                className="inline-flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
               >
-                <ReloadOutlined />
                 Refresh
               </button>
               <button
                 type="button"
                 onClick={() => setShowNewModal(true)}
-                className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white"
+                className="inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium text-white"
                 style={{ backgroundColor: BRAND }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.backgroundColor = BRAND_DARK;
@@ -346,8 +343,7 @@ export default function OverloadFines() {
                   e.currentTarget.style.backgroundColor = BRAND;
                 }}
               >
-                <Plus size={18} />
-                Overload Charge
+                Bill
               </button>
             </div>
           }

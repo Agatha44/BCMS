@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { AlertCircle, Eye, Loader2, Plus } from 'lucide-react';
-import { ReloadOutlined } from '@ant-design/icons';
+import { AlertCircle, Plus } from 'lucide-react';
 import PropTypes from 'prop-types';
 
 import DataTable from '../../../data/DataTable.jsx';
@@ -131,8 +130,7 @@ export default function EndOfShiftDetails({ hideBreadcrumb = false }) {
                 setPreviewOpen(true);
               }}
             >
-              <Eye size={16} className="text-white" />
-              <span>View</span>
+              View
             </button>
           );
         },
@@ -206,11 +204,10 @@ export default function EndOfShiftDetails({ hideBreadcrumb = false }) {
               <button
                 type="button"
                 onClick={refreshList}
-                className="btn-secondary flex items-center space-x-2 px-3 py-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className="btn-secondary px-3 py-2 disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={loading}
               >
-                {loading ? <Loader2 size={16} className="animate-spin" /> : <ReloadOutlined className="text-gray-700" />}
-                <span>Refresh</span>
+                Refresh
               </button>
               <button
                 type="button"

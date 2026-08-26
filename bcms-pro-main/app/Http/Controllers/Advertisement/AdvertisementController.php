@@ -387,8 +387,17 @@ class AdvertisementController extends BasicController
     private function formatBillRow(object $bill): array
     {
         $status = (string) ($bill->bill_status ?? '');
-        $isCancelled = (int) ($bill->is_cancelled ?? 0) === 1 || $status === BridgeBill::CANCELLED;
-        $isPaid = !empty($bill->trx_id) || !empty($bill->trx_dt_tm) || strtoupper($status) === 'PAID';
+        $hasReceipt = $this->hasPaymentReceipt($bill->psp_receipt_num ?? $bill->receipt_number ?? null);
+        $isCancelled = ((int) ($bill->is_cancelled ?? 0) === 1 || $status === BridgeBill::CANCELLED) && !$hasReceipt;
+        $isPaid = $hasReceipt || !empty($bill->trx_id) || !empty($bill->trx_dt_tm) || strtoupper($status) === 'PAID';
+
+        if ($hasReceipt) {
+            $billStatus = 'PAID';
+        } elseif ($isCancelled) {
+            $billStatus = 'CANCELLED';
+        } else {
+            $billStatus = $isPaid ? 'PAID' : ($status === BridgeBill::REQUESTED ? 'PENDING' : $status);
+        }
 
         return [
             'id' => $bill->id,
@@ -403,7 +412,7 @@ class AdvertisementController extends BasicController
             'psp_receipt_num' => $bill->psp_receipt_num,
             'bill_amount' => $bill->bill_amount !== null ? (float) $bill->bill_amount : null,
             'bill_desc' => $bill->bill_desc,
-            'bill_status' => $isCancelled ? 'CANCELLED' : ($isPaid ? 'PAID' : ($status === BridgeBill::REQUESTED ? 'PENDING' : $status)),
+            'bill_status' => $billStatus,
             'is_cancelled' => $isCancelled,
             'bill_generated_at' => $bill->bill_gen_at,
             'bill_expiry_at' => $bill->bill_exp_dt,
@@ -415,8 +424,21 @@ class AdvertisementController extends BasicController
             'error_code' => $bill->error_code ?? null,
             'updated_at' => $bill->updated_at ?? null,
             'can_cancel' => !$isCancelled && !$isPaid,
-            'can_print' => $isPaid && !$isCancelled,
+            'can_print' => $hasReceipt && !$isCancelled,
         ];
+    }
+
+    private function hasPaymentReceipt(?string $receipt): bool
+    {
+        $receipt = trim((string) $receipt);
+        if ($receipt === '') {
+            return false;
+        }
+
+        $upper = strtoupper($receipt);
+        return strpos($upper, 'CANC') !== 0
+            && strpos($upper, 'BILL FAILED') !== 0
+            && strpos($upper, 'BILL EXPIRED') !== 0;
     }
 
     private function numberToWords($number)

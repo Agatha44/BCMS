@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { AlertCircle, Eye, Loader2, Plus } from 'lucide-react';
-import { ReloadOutlined } from '@ant-design/icons';
+import { AlertCircle } from 'lucide-react';
 import { Tag } from 'antd';
 import PropTypes from 'prop-types';
 import Swal from 'sweetalert2';
@@ -197,8 +196,7 @@ export default function EndOfShiftBilling({ hideBreadcrumb = false }) {
               setViewBillOpen(true);
             }}
           >
-            <Eye size={16} className="text-white" />
-            <span>View</span>
+            View
           </button>
         ),
       },
@@ -296,7 +294,7 @@ export default function EndOfShiftBilling({ hideBreadcrumb = false }) {
             </div>
             <button
               type="button"
-              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white transition lg:mb-0"
+              className="inline-flex shrink-0 items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold text-white transition lg:mb-0"
               style={{ backgroundColor: BRAND }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor = BRAND_DARK;
@@ -306,8 +304,7 @@ export default function EndOfShiftBilling({ hideBreadcrumb = false }) {
               }}
               onClick={openBillShift}
             >
-              <Plus size={16} />
-              Bill Shift
+              Bill
             </button>
           </div>
         </div>
@@ -340,11 +337,10 @@ export default function EndOfShiftBilling({ hideBreadcrumb = false }) {
               <button
                 type="button"
                 onClick={refreshList}
-                className="btn-secondary flex items-center space-x-2 px-3 py-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className="btn-secondary px-3 py-2 disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={loading}
               >
-                {loading ? <Loader2 size={16} className="animate-spin" /> : <ReloadOutlined className="text-gray-700" />}
-                <span>Refresh</span>
+                Refresh
               </button>
             }
           />
