@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { AlertCircle, ArrowRightLeft, Eye } from 'lucide-react';
-import { ReloadOutlined } from '@ant-design/icons';
+import { AlertCircle, Eye } from 'lucide-react';
 import { Badge, Tabs, Tag } from 'antd';
 import DataTable from '../../../common/data/DataTable.jsx';
 import CollectionLoader from '../components/CollectionLoader.jsx';
@@ -98,7 +97,8 @@ export default function FundTransferList() {
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    if (params.get('tab') !== 'fund-transfer') return;
+    const pageTab = params.get('tab');
+    if (pageTab && pageTab !== 'fund-transfer') return;
 
     const fromUrl = getStatusTabFromSearchParams(params);
     const nextTab = fromUrl ?? getDefaultStatusTab(isApprover);
@@ -362,29 +362,25 @@ export default function FundTransferList() {
           fetchTransfers();
           fetchPendingCount();
         }}
-        className="btn-secondary flex items-center space-x-2 px-3 py-2 disabled:cursor-not-allowed disabled:opacity-50"
+        className="btn-secondary flex items-center px-3 py-2 disabled:cursor-not-allowed disabled:opacity-50"
         disabled={loading}
       >
-        <ReloadOutlined className="text-gray-700" />
-        <span>Refresh</span>
+        Refresh
       </button>
-      {!isPendingTab && !isApprover ? (
-        <button
-          type="button"
-          onClick={() => setCreateModalOpen(true)}
-          className="flex items-center space-x-2 rounded-lg px-4 py-2 text-white disabled:cursor-not-allowed disabled:opacity-50"
-          style={{ backgroundColor: BRAND }}
-          onMouseEnter={(e) => {
-            if (!e.currentTarget.disabled) e.currentTarget.style.backgroundColor = BRAND_DARK;
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = BRAND;
-          }}
-        >
-          <ArrowRightLeft size={16} />
-          <span>Fund Transfer</span>
-        </button>
-      ) : null}
+      <button
+        type="button"
+        onClick={() => setCreateModalOpen(true)}
+        className="flex items-center rounded-lg px-4 py-2 text-white disabled:cursor-not-allowed disabled:opacity-50"
+        style={{ backgroundColor: BRAND }}
+        onMouseEnter={(e) => {
+          if (!e.currentTarget.disabled) e.currentTarget.style.backgroundColor = BRAND_DARK;
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = BRAND;
+        }}
+      >
+        Initiate
+      </button>
     </div>
   );
 

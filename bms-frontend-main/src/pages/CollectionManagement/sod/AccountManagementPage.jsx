@@ -1,22 +1,9 @@
 import AccountsManagement from '../AccountsManagement.jsx';
-import FundTransferList from './FundTransferList.jsx';
-import SoDTabbedPage from './components/SoDTabbedPage.jsx';
-
-const tabs = [
-    {
-        key: 'all',
-        label: 'All Accounts',
-        content: <AccountsManagement />,
-    },
-    {
-        key: 'fund-transfer',
-        label: 'Fund Transfer',
-        content: <FundTransferList />,
-    },
-];
 
 const AccountManagementPage = () => (
-    <SoDTabbedPage tabs={tabs} />
+  <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
+    <AccountsManagement />
+  </div>
 );
 
 export default AccountManagementPage;

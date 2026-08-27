@@ -1,7 +1,6 @@
 import {useEffect, useMemo, useState} from 'react';
 import {App, Input} from 'antd';
-import {ReloadOutlined} from '@ant-design/icons';
-import {AlertCircle, Eye, Plus, Search} from 'lucide-react';
+import {AlertCircle, Search} from 'lucide-react';
 
 import DataTable from '../../../../common/data/DataTable.jsx';
 import CollectionLoader from '../../components/CollectionLoader.jsx';
@@ -247,7 +246,7 @@ export default function VehiclesList() {
                             type="button"
                             onClick={() => openViewModal(vehicle)}
                             disabled={loadingViewId === vehicle.id}
-                            className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-white transition disabled:cursor-not-allowed disabled:opacity-50"
+                            className="inline-flex items-center rounded-lg px-3 py-1.5 text-xs font-medium text-white transition disabled:cursor-not-allowed disabled:opacity-50"
                             title="View Vehicle Details"
                             style={{backgroundColor: BRAND}}
                             onMouseEnter={(e) => {
@@ -261,7 +260,6 @@ export default function VehiclesList() {
                                 }
                             }}
                         >
-                            <Eye size={13} />
                             View
                         </button>
                     </div>
@@ -346,16 +344,15 @@ export default function VehiclesList() {
                     <button
                         type="button"
                         onClick={fetchVehicles}
-                        className="btn-secondary flex items-center space-x-2 px-3 py-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="btn-secondary flex items-center px-3 py-2 disabled:cursor-not-allowed disabled:opacity-50"
                         disabled={loading}
                     >
-                            <ReloadOutlined className="text-gray-700" />
-                        <span>Refresh</span>
+                        Refresh
                     </button>
 
                     <button
                         type="button"
-                        className="flex items-center space-x-2 rounded-lg px-4 py-2 text-white disabled:cursor-not-allowed disabled:opacity-50"
+                        className="flex items-center rounded-lg px-4 py-2 text-white disabled:cursor-not-allowed disabled:opacity-50"
                         style={{backgroundColor: BRAND}}
                         onMouseEnter={(e) => {
                             if (!e.currentTarget.disabled) {
@@ -369,8 +366,7 @@ export default function VehiclesList() {
                         }}
                         onClick={() => setCreateOpen(true)}
                     >
-                        <Plus size={16} />
-                        <span>Add Vehicle</span>
+                        Add
                     </button>
                 </div>
             </div>

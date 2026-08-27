@@ -43,7 +43,6 @@ import CollectionDashboard from '../pages/CollectionManagement/CollectionDashboa
 import CollectionsManagementPage from '../pages/CollectionManagement/sod/CollectionsManagementPage.jsx';
 import ManageAccounts from '../pages/CollectionManagement/ManageAccounts.jsx';
 import VehiclesManagement from '../pages/CollectionManagement/VehiclesManagement.jsx';
-import Reconciliation from '../pages/CollectionManagement/Reconciliation.jsx';
 import BridgeReports from '../pages/CollectionManagement/BridgeReports.jsx';
 import ConfigurationManagement from '../pages/CollectionManagement/ConfigurationManagement.jsx';
 import Payslips from '../pages/PayrollManagement/Payslips.jsx';
@@ -65,6 +64,7 @@ import SystemSettingsPage from '../pages/CollectionManagement/sod/SystemSettings
 import PriceManagementPage from '../pages/CollectionManagement/sod/PriceManagementPage.jsx';
 import ReceiptManagementPage from '../pages/CollectionManagement/sod/ReceiptManagementPage.jsx';
 import PreReceiptManagementPage from '../pages/CollectionManagement/sod/PreReceiptManagementPage.jsx';
+import ReconciliationManagementPage from '../pages/CollectionManagement/sod/ReconciliationManagementPage.jsx';
 
 export default function AppRoutes() {
     return useRoutes([
@@ -192,9 +192,7 @@ export default function AppRoutes() {
         path: '/collection-management/reconciliation',
         element: (
           <ProtectedRoute>
-            <Layout>
-              <Reconciliation />
-            </Layout>
+            <Navigate to="/collection-management/reconciliation-management" replace />
           </ProtectedRoute>
         )
       },
@@ -737,6 +735,16 @@ export default function AppRoutes() {
           <ProtectedRoute>
             <Layout>
               <PreReceiptManagementPage />
+            </Layout>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/collection-management/reconciliation-management',
+        element: (
+          <ProtectedRoute>
+            <Layout>
+              <ReconciliationManagementPage />
             </Layout>
           </ProtectedRoute>
         )

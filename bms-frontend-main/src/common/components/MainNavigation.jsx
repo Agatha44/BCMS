@@ -26,6 +26,7 @@ import {
   Banknote,
   ArrowRightLeft,
   Receipt,
+  Scale,
 } from 'lucide-react';
 
 /**
@@ -104,6 +105,22 @@ const SOD_NAV_ITEMS = [
     label: 'Manage Pre-receipts',
     icon: <FileText size={20} />,
     path: '/collection-management/pre-receipt-management',
+    roles: [
+      'Toll Registrar',
+      'Toll Collector',
+      'Toll Supervisor',
+      'Toll Approver',
+      'Toll Reviewer',
+      'Toll Auditor',
+      'Toll Administrator',
+      'Toll Accountant',
+    ],
+  },
+  {
+    id: 'sod-reconciliation-management',
+    label: 'Manage Update-receipts',
+    icon: <Scale size={20} />,
+    path: '/collection-management/reconciliation-management',
     roles: [
       'Toll Registrar',
       'Toll Collector',

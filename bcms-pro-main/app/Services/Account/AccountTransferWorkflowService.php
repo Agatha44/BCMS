@@ -71,15 +71,39 @@ class AccountTransferWorkflowService
      */
     public function submit(array $input, UploadedFile $file, int $userId): array
     {
-        $fromAccountId = (int) $input['from_account_id'];
-        $toAccountId = (int) $input['to_account_id'];
+        $fromAccountNo = $this->normalizeAccountReference($input['from_account_id'] ?? null);
+        $toAccountNo = $this->normalizeAccountReference($input['to_account_id'] ?? null);
         $amount = (float) $input['amount'];
-        $narration = (string) $input['narration'];
+        $narration = (string) ($input['narration'] ?? '');
+        $requestType = (string) $input['request_type'];
+        $action = (string) $input['action'];
+        $requestDate = $input['request_date'] ?? null;
         $clientReference = $input['client_reference'] ?? null;
+
+        if ($fromAccountNo === '' || $toAccountNo === '') {
+            return [
+                'success' => false,
+                'error' => 'Account number is required',
+                'errors' => [
+                    'from_account_id' => $fromAccountNo === '' ? ['From account is required.'] : [],
+                    'to_account_id' => $toAccountNo === '' ? ['To account is required.'] : [],
+                ],
+                'http' => 422,
+            ];
+        }
+
+        if ($fromAccountNo === $toAccountNo) {
+            return [
+                'success' => false,
+                'error' => 'Source and destination accounts must be different',
+                'errors' => ['to_account_id' => ['Source and destination accounts must be different.']],
+                'http' => 422,
+            ];
+        }
 
         if (!empty($clientReference)) {
             $existing = AccountTransfer::query()
-                ->where('from_account_id', $fromAccountId)
+                ->where('from_account_id', $fromAccountNo)
                 ->where('client_reference', $clientReference)
                 ->first();
 
@@ -93,7 +117,7 @@ class AccountTransferWorkflowService
             }
         }
 
-        $accountCheck = $this->validateAccounts($fromAccountId, $toAccountId, $amount, checkBalance: true);
+        $accountCheck = $this->validateAccounts($fromAccountNo, $toAccountNo, $amount, checkBalance: true);
         if (!$accountCheck['success']) {
             return $accountCheck;
         }
@@ -118,12 +142,15 @@ class AccountTransferWorkflowService
             $transfer = AccountTransfer::query()->create([
                 'transfer_uuid' => $transferUuid,
                 'client_reference' => $clientReference,
-                'from_account_id' => $fromAccountId,
-                'to_account_id' => $toAccountId,
+                'from_account_id' => $fromAccountNo,
+                'to_account_id' => $toAccountNo,
                 'amount' => $amount,
                 'status' => AccountTransferStatus::PENDING,
                 'posted_at' => null,
                 'narration' => $narration,
+                'request_type' => $requestType,
+                'action' => $action,
+                'request_date' => $requestDate,
                 'approval_document_path' => $documentMeta['path'],
                 'approval_document_name' => $documentMeta['name'],
                 'approval_document_mime' => $documentMeta['mime'],
@@ -176,12 +203,15 @@ class AccountTransferWorkflowService
             return ['success' => false, 'error' => 'Only the original submitter can resubmit this transfer', 'http' => 403];
         }
 
-        $fromAccountId = (int) $transfer->from_account_id;
-        $toAccountId = (int) $transfer->to_account_id;
+        $fromAccountNo = $this->normalizeAccountReference($transfer->from_account_id);
+        $toAccountNo = $this->normalizeAccountReference($transfer->to_account_id);
         $amount = isset($input['amount']) ? (float) $input['amount'] : (float) $transfer->amount;
         $narration = isset($input['narration']) ? (string) $input['narration'] : (string) $transfer->narration;
+        $requestType = isset($input['request_type']) ? (string) $input['request_type'] : (string) $transfer->request_type;
+        $action = isset($input['action']) ? (string) $input['action'] : (string) $transfer->action;
+        $requestDate = $input['request_date'] ?? $transfer->request_date;
 
-        $accountCheck = $this->validateAccounts($fromAccountId, $toAccountId, $amount, checkBalance: true);
+        $accountCheck = $this->validateAccounts($fromAccountNo, $toAccountNo, $amount, checkBalance: true);
         if (!$accountCheck['success']) {
             return $accountCheck;
         }
@@ -212,6 +242,9 @@ class AccountTransferWorkflowService
 
         $transfer->amount = $amount;
         $transfer->narration = $narration;
+        $transfer->request_type = $requestType;
+        $transfer->action = $action;
+        $transfer->request_date = $requestDate;
         $transfer->status = AccountTransferStatus::PENDING;
         $transfer->returned_by = null;
         $transfer->returned_at = null;
@@ -358,25 +391,22 @@ class AccountTransferWorkflowService
      */
     private function postTransfer(AccountTransfer $transfer, int $userId): array
     {
-        $fromAccountId = (int) $transfer->from_account_id;
-        $toAccountId = (int) $transfer->to_account_id;
+        $fromAccountNo = $this->normalizeAccountReference($transfer->from_account_id);
+        $toAccountNo = $this->normalizeAccountReference($transfer->to_account_id);
         $amount = (float) $transfer->amount;
         $narration = (string) $transfer->narration;
         $transferUuid = (string) $transfer->transfer_uuid;
 
-        $ids = [$fromAccountId, $toAccountId];
-        sort($ids);
-
         $accounts = Account::query()
-            ->whereIn('account_no', $ids)
+            ->whereIn('account_no', [$fromAccountNo, $toAccountNo])
             ->lockForUpdate()
             ->get()
             ->keyBy('account_no');
 
         /** @var Account|null $from */
-        $from = $accounts->get($fromAccountId);
+        $from = $accounts->get($fromAccountNo);
         /** @var Account|null $to */
-        $to = $accounts->get($toAccountId);
+        $to = $accounts->get($toAccountNo);
 
         if (!$from) {
             throw ValidationException::withMessages([
@@ -422,12 +452,12 @@ class AccountTransferWorkflowService
         $to->updated_by = $userId;
         $to->save();
 
-        $referenceNumber = 'TRF_' . now()->format('Ymd_His') . '_' . $fromAccountId . '_' . $toAccountId;
+        $referenceNumber = 'TRF_' . now()->format('Ymd_His') . '_' . $fromAccountNo . '_' . $toAccountNo;
 
         DB::table('account_transaction')->insert([
             [
                 'account_transfer_id' => $transfer->id,
-                'account_id' => $fromAccountId,
+                'account_id' => $from->id,
                 'entry_type' => 'debit',
                 'amount' => -1 * $amount,
                 'previous_balance' => $fromPrevBalance,
@@ -436,8 +466,8 @@ class AccountTransferWorkflowService
                 'description' => $narration ?: 'Account transfer (debit)',
                 'metadata' => json_encode([
                     'transfer_uuid' => $transferUuid,
-                    'from_account_id' => $fromAccountId,
-                    'to_account_id' => $toAccountId,
+                    'from_account_id' => $fromAccountNo,
+                    'to_account_id' => $toAccountNo,
                 ]),
                 'created_by' => $userId,
                 'created_at' => now(),
@@ -446,7 +476,7 @@ class AccountTransferWorkflowService
             ],
             [
                 'account_transfer_id' => $transfer->id,
-                'account_id' => $toAccountId,
+                'account_id' => $to->id,
                 'entry_type' => 'credit',
                 'amount' => $amount,
                 'previous_balance' => $toPrevBalance,
@@ -455,8 +485,8 @@ class AccountTransferWorkflowService
                 'description' => $narration ?: 'Account transfer (credit)',
                 'metadata' => json_encode([
                     'transfer_uuid' => $transferUuid,
-                    'from_account_id' => $fromAccountId,
-                    'to_account_id' => $toAccountId,
+                    'from_account_id' => $fromAccountNo,
+                    'to_account_id' => $toAccountNo,
                 ]),
                 'created_by' => $userId,
                 'created_at' => now(),
@@ -559,16 +589,16 @@ class AccountTransferWorkflowService
     /**
      * @return array{success: bool, error?: string, errors?: array, http?: int}
      */
-    private function validateAccounts(int $fromAccountId, int $toAccountId, float $amount, bool $checkBalance): array
+    private function validateAccounts(string $fromAccountNo, string $toAccountNo, float $amount, bool $checkBalance): array
     {
-        $from = Account::query()->where('account_no', $fromAccountId)->first();
-        $to = Account::query()->where('account_no', $toAccountId)->first();
+        $from = $this->findAccountByReference($fromAccountNo);
+        $to = $this->findAccountByReference($toAccountNo);
 
         if (!$from) {
-            return ['success' => false, 'error' => 'From account not found', 'errors' => ['from_account_id' => [$fromAccountId]], 'http' => 404];
+            return ['success' => false, 'error' => 'From account not found', 'errors' => ['from_account_id' => ['From account not found.']], 'http' => 404];
         }
         if (!$to) {
-            return ['success' => false, 'error' => 'To account not found', 'errors' => ['to_account_id' => [$toAccountId]], 'http' => 404];
+            return ['success' => false, 'error' => 'To account not found', 'errors' => ['to_account_id' => ['To account not found.']], 'http' => 404];
         }
 
         if ($from->status != '1') {
@@ -633,5 +663,24 @@ class AccountTransferWorkflowService
         $data['has_approval_document'] = !empty($path);
 
         return $data;
+    }
+
+    private function normalizeAccountReference($value): string
+    {
+        return trim((string) ($value ?? ''));
+    }
+
+    private function findAccountByReference(string $reference): ?Account
+    {
+        if ($reference === '') {
+            return null;
+        }
+
+        $query = Account::query()->where('account_no', $reference);
+        if (ctype_digit($reference)) {
+            $query->orWhere('id', (int) $reference);
+        }
+
+        return $query->first();
     }
 }

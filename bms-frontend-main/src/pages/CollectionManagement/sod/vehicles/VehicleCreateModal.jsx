@@ -1,6 +1,6 @@
 import {useEffect, useRef, useState} from 'react';
 import {App, Button, Form, Input, Modal, Select, Spin} from 'antd';
-import {ImageOff, Maximize2, Plus, Upload as UploadIcon, X as XIcon} from 'lucide-react';
+import {ImageOff, Maximize2, Upload as UploadIcon, X as XIcon} from 'lucide-react';
 import {apiService} from '../../../../services/api.jsx';
 
 const BRAND = '#962E32';
@@ -182,8 +182,8 @@ const VehicleCreateModal = ({open, onClose, onCreated}) => {
                 destroyOnHidden
                 title={null}
                 closable={false}
-                maskClosable={!saving}
-                keyboard={!saving}
+                maskClosable={false}
+                keyboard={false}
                 className="brand-modal vehicle-create-modal"
                 styles={{body: {padding: 0}, content: {padding: 0, overflow: 'hidden'}}}
             >
@@ -331,7 +331,6 @@ const VehicleCreateModal = ({open, onClose, onCreated}) => {
                 <div className="flex items-center justify-end gap-2 border-t border-slate-200 bg-white px-6 py-3">
                     <Button
                         type="primary"
-                        icon={<Plus size={14} />}
                         onClick={handleSave}
                         loading={saving}
                         disabled={saving}
@@ -347,10 +346,10 @@ const VehicleCreateModal = ({open, onClose, onCreated}) => {
                             e.currentTarget.style.borderColor = BRAND;
                         }}
                     >
-                        Create
+                        Add
                     </Button>
                     <Button onClick={handleCloseInternal} disabled={saving}>
-                        Cancel
+                        Close
                     </Button>
                 </div>
             </Modal>

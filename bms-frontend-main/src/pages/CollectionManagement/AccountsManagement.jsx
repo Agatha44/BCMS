@@ -1715,8 +1715,8 @@ export default function AccountsManagement() {
         destroyOnHidden
         title={null}
         closable={false}
-        maskClosable={!creating && !showOtpModal}
-        keyboard={!creating && !showOtpModal}
+        maskClosable={false}
+        keyboard={false}
         className="brand-modal"
         styles={{ body: { padding: 0 }, content: { padding: 0, overflow: 'hidden' } }}
       >
@@ -1826,8 +1826,8 @@ export default function AccountsManagement() {
         destroyOnHidden
         title={null}
         closable={false}
-        maskClosable={!verifyingOtp && !sendingOtp}
-        keyboard={!verifyingOtp && !sendingOtp}
+        maskClosable={false}
+        keyboard={false}
         zIndex={1100}
         className="brand-modal"
         styles={{ body: { padding: 0 }, content: { padding: 0, overflow: 'hidden' } }}

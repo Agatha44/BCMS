@@ -1,7 +1,7 @@
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {App, Button, Input} from 'antd';
-import {ReloadOutlined, SearchOutlined} from '@ant-design/icons';
-import {AlertCircle, Eye} from 'lucide-react';
+import {SearchOutlined} from '@ant-design/icons';
+import {AlertCircle} from 'lucide-react';
 
 import DataTable from '../../../../common/data/DataTable.jsx';
 import CollectionLoader from '../../components/CollectionLoader.jsx';
@@ -227,7 +227,7 @@ export default function VehicleTransactions() {
                                 disabled={!hasVehicle || isLoading}
                                 onClick={() => openVehicleDetails(record)}
                                 title={hasVehicle ? 'View vehicle details' : 'No linked vehicle profile'}
-                                className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-white transition disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400"
+                                className="inline-flex items-center rounded-lg px-3 py-1.5 text-xs font-medium text-white transition disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400"
                                 style={hasVehicle ? {backgroundColor: BRAND} : undefined}
                                 onMouseEnter={(e) => {
                                     if (!e.currentTarget.disabled) {
@@ -240,7 +240,6 @@ export default function VehicleTransactions() {
                                     }
                                 }}
                             >
-                                <Eye size={13} />
                                 View
                             </button>
                         </div>
@@ -304,11 +303,10 @@ export default function VehicleTransactions() {
                     <button
                         type="button"
                         onClick={() => fetchTransactions()}
-                        className="btn-secondary flex items-center space-x-2 px-3 py-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="btn-secondary flex items-center px-3 py-2 disabled:cursor-not-allowed disabled:opacity-50"
                         disabled={loading}
                     >
-                        <ReloadOutlined className="text-gray-700" />
-                        <span>Refresh</span>
+                        Refresh
                     </button>
                 </div>
             </div>

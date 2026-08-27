@@ -19,6 +19,9 @@ class AccountTransfer extends Model
         'status',
         'posted_at',
         'narration',
+        'request_type',
+        'action',
+        'request_date',
         'approval_document_path',
         'approval_document_name',
         'approval_document_mime',
@@ -38,6 +41,7 @@ class AccountTransfer extends Model
     protected $casts = [
         'amount' => 'decimal:2',
         'posted_at' => 'datetime',
+        'request_date' => 'date',
         'approved_at' => 'datetime',
         'rejected_at' => 'datetime',
         'returned_at' => 'datetime',
