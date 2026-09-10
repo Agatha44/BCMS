@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Constants\AccountTransferRequest;
 use App\Constants\AccountTransferStatus;
 use App\Models\AccountTransfer;
 use App\Services\Account\AccountTransferDocumentService;
@@ -33,10 +34,13 @@ class AccountTransferController extends BasicController
         ]);
 
         $validator = Validator::make($request->all(), [
-            'from_account_id' => 'required|integer|different:to_account_id',
-            'to_account_id' => 'required|integer',
+            'from_account_id' => 'required|string|max:32|different:to_account_id',
+            'to_account_id' => 'required|string|max:32',
             'amount' => 'required|numeric|min:0.01',
-            'narration' => 'required|string|max:255',
+            'narration' => 'nullable|string|max:255',
+            'request_type' => ['required', 'string', Rule::in(AccountTransferRequest::types())],
+            'action' => ['required', 'string', Rule::in(AccountTransferRequest::actions())],
+            'request_date' => 'required|date',
             'client_reference' => 'nullable|string|max:64',
             'approval_document' => 'required|file',
         ]);
@@ -61,7 +65,10 @@ class AccountTransferController extends BasicController
     {
         $validator = Validator::make($request->all(), [
             'amount' => 'sometimes|numeric|min:0.01',
-            'narration' => 'sometimes|string|max:255',
+            'narration' => 'sometimes|nullable|string|max:255',
+            'request_type' => ['sometimes', 'string', Rule::in(AccountTransferRequest::types())],
+            'action' => ['sometimes', 'string', Rule::in(AccountTransferRequest::actions())],
+            'request_date' => 'sometimes|date',
             'approval_document' => 'sometimes|file',
         ]);
 

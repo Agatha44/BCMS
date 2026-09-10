@@ -1,13 +1,18 @@
 import { useEffect, useState } from 'react';
-import { ArrowRightLeft, Save } from 'lucide-react';
+import { ArrowRightLeft } from 'lucide-react';
 import { UploadOutlined } from '@ant-design/icons';
-import { Button, Form, Input, InputNumber, Modal, Upload } from 'antd';
+import { Button, DatePicker, Form, Input, InputNumber, Modal, Select, Upload } from 'antd';
 import Swal from 'sweetalert2';
+import dayjs from 'dayjs';
 import { formatCurrency } from '../../../../common/utils/numberFormat.js';
 import BrandModalHeader from './BrandModalHeader.jsx';
 import CollectionLoader from '../../components/CollectionLoader.jsx';
 import { apiService } from '../../../../services/api.jsx';
-import { formatApiValidationErrors } from '../utils/fundTransferUtils.js';
+import {
+  FUND_TRANSFER_ACTION_OPTIONS,
+  FUND_TRANSFER_REQUEST_TYPE_OPTIONS,
+  formatApiValidationErrors,
+} from '../utils/fundTransferUtils.js';
 
 const BRAND = '#962E32';
 const BRAND_DARK = '#7A2326';
@@ -287,13 +292,16 @@ export default function FundTransferModal({
       setFromAccountNo(String(initialTransfer.from_account_no ?? ''));
       setToAccountNo(String(initialTransfer.to_account_no ?? ''));
       form.setFieldsValue({
+        request_type: initialTransfer.request_type || undefined,
+        action: initialTransfer.action || undefined,
+        request_date: initialTransfer.request_date ? dayjs(initialTransfer.request_date) : dayjs(),
         amount: initialTransfer.amount != null ? Number(initialTransfer.amount) : undefined,
-        narration: initialTransfer.narration ?? '',
       });
       return;
     }
 
     resetState();
+    form.setFieldsValue({ request_date: dayjs() });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, isResubmit, transferId, initialTransfer]);
 
@@ -331,16 +339,6 @@ export default function FundTransferModal({
         icon: 'warning',
         title: 'To account required',
         text: toError || 'Enter a valid destination account number.',
-      });
-      return;
-    }
-
-    const narration = values.narration?.trim();
-    if (!narration) {
-      await Swal.fire({
-        icon: 'warning',
-        title: 'Narration required',
-        text: 'Please enter a narration for this transfer.',
       });
       return;
     }
@@ -398,7 +396,9 @@ export default function FundTransferModal({
         from_account_id: fromAccount.account_no,
         to_account_id: toAccount.account_no,
         amount,
-        narration,
+        request_type: values.request_type,
+        action: values.action,
+        request_date: values.request_date ? values.request_date.format('YYYY-MM-DD') : undefined,
       };
 
       const res = isResubmit
@@ -434,10 +434,11 @@ export default function FundTransferModal({
       onSubmitted?.(res);
       handleClose();
     } catch (err) {
+      const message = formatApiValidationErrors(err, err?.message || 'An unexpected error occurred.');
       await Swal.fire({
         icon: 'error',
         title: 'Error',
-        text: formatApiValidationErrors(err, err?.message || 'An unexpected error occurred.'),
+        html: String(message).replace(/\n/g, '<br />'),
       });
     } finally {
       setSubmitting(false);
@@ -455,13 +456,13 @@ export default function FundTransferModal({
       destroyOnHidden
       title={null}
       closable={false}
-      maskClosable={!submitting}
-      keyboard={!submitting}
+      maskClosable={false}
+      keyboard={false}
       className="brand-modal"
       styles={{ body: { padding: 0 }, content: { padding: 0, overflow: 'hidden' } }}
     >
       <BrandModalHeader
-        title={isResubmit ? 'Resubmit Fund Transfer' : 'Fund Transfer'}
+        title={isResubmit ? 'Resubmit Request Update-receipt' : 'Request Update-receipt'}
         onClose={handleClose}
       />
 
@@ -480,6 +481,42 @@ export default function FundTransferModal({
                 ? 'Update the transfer details and upload a new approval PDF, then resubmit for review.'
                 : 'Transfer balance between accounts. The request requires approval before funds are moved.'}
             </span>
+          </div>
+
+          <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Form.Item
+              name="request_type"
+              label={
+                <span className="text-xs font-semibold tracking-[0.01em]" style={{ color: BRAND }}>
+                  Request Type
+                </span>
+              }
+              rules={[{ required: true, message: 'Please select a request type' }]}
+            >
+              <Select
+                placeholder="Select request type"
+                options={FUND_TRANSFER_REQUEST_TYPE_OPTIONS}
+                disabled={submitting}
+                className="!w-full"
+              />
+            </Form.Item>
+
+            <Form.Item
+              name="action"
+              label={
+                <span className="text-xs font-semibold tracking-[0.01em]" style={{ color: BRAND }}>
+                  Action
+                </span>
+              }
+              rules={[{ required: true, message: 'Please select an action' }]}
+            >
+              <Select
+                placeholder="Select action"
+                options={FUND_TRANSFER_ACTION_OPTIONS}
+                disabled={submitting}
+                className="!w-full"
+              />
+            </Form.Item>
           </div>
 
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -546,22 +583,20 @@ export default function FundTransferModal({
             </Form.Item>
 
             <Form.Item
-              name="narration"
+              name="request_date"
               label={
                 <span className="text-xs font-semibold tracking-[0.01em]" style={{ color: BRAND }}>
-                  Narration
+                  Date
                 </span>
               }
-              rules={[
-                { required: true, message: 'Please enter narration for this transfer' },
-                { whitespace: true, message: 'Please enter narration for this transfer' },
-              ]}
+              rules={[{ required: true, message: 'Please select a date' }]}
             >
-              <Input.TextArea
-                rows={2}
-                placeholder="Reason or description for this transfer"
+              <DatePicker
+                className="!w-full !rounded-lg"
+                format="DD/MM/YYYY"
+                placeholder="Select date"
                 disabled={submitting}
-                className="!rounded-lg"
+                disabledDate={(current) => current && current > dayjs().endOf('day')}
               />
             </Form.Item>
           </div>
@@ -603,7 +638,6 @@ export default function FundTransferModal({
             type="primary"
             htmlType="submit"
             loading={submitting}
-            icon={<Save size={14} />}
             style={{ backgroundColor: BRAND, borderColor: BRAND }}
             onMouseEnter={(e) => {
               e.currentTarget.style.backgroundColor = BRAND_DARK;
@@ -614,7 +648,7 @@ export default function FundTransferModal({
               e.currentTarget.style.borderColor = BRAND;
             }}
           >
-            {isResubmit ? 'Resubmit Transfer' : 'Submit Transfer'}
+            {isResubmit ? 'Resubmit Transfer' : 'Initiate'}
           </Button>
           <Button onClick={handleClose} disabled={submitting}>
             Close

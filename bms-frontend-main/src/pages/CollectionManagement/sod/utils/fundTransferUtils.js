@@ -2,6 +2,25 @@ import { isTransferPending, isTransferReturned } from './fundTransferStatus.js';
 
 export { getTransferStatusLabel, isTransferPending, isTransferReturned } from './fundTransferStatus.js';
 
+export const FUND_TRANSFER_REQUEST_TYPE_OPTIONS = [
+  { value: 'fund_transfer', label: 'Fund Transfer' },
+ 
+];
+
+export const FUND_TRANSFER_ACTION_OPTIONS = [
+  { value: 'cashless_to_cashless', label: 'From Cashless Account-to Cashless Account' },
+  { value: 'cashless_to_pension', label: 'From Cashless Account-to Pension Account' },
+  { value: 'pension_to_cashless', label: 'From Pension Account-to Cashless Account' },
+  { value: 'bundle_to_cashless', label: 'From Bundle Account-to Cashless Account' },
+  { value: 'cashless_to_bundle', label: 'From Cashless Account-to Bundle Account' },
+];
+
+export const getFundTransferOptionLabel = (options, value) => {
+  if (value == null || value === '') return '';
+  const match = options.find((option) => option.value === value);
+  return match?.label ?? String(value);
+};
+
 const FUND_TRANSFER_APPROVER_ROLES = [
   'toll approver',
   'toll supervisor',

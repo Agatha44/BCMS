@@ -1,4 +1,3 @@
-import {ClipboardList, List} from 'lucide-react';
 import SoDTabbedPage from './components/SoDTabbedPage.jsx';
 import VehicleTransactions from './vehicles/VehicleTransactions.jsx';
 import VehiclesList from './vehicles/VehiclesList.jsx';
@@ -6,14 +5,12 @@ import VehiclesList from './vehicles/VehiclesList.jsx';
 const tabs = [
     {
         key: 'all',
-        label: 'All Vehicles',
-        icon: <List size={16} />,
+        label: 'Vehicle',
         content: <VehiclesList />,
     },
     {
         key: 'transactions',
-        label: 'Vehicle Transactions',
-        icon: <ClipboardList size={16} />,
+        label: 'Transaction',
         content: <VehicleTransactions />,
     },
 ];

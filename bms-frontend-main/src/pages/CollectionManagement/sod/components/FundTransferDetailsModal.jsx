@@ -12,10 +12,13 @@ import BrandModalHeader from './BrandModalHeader.jsx';
 import FundTransferApprovalDocumentTab from './FundTransferApprovalDocumentTab.jsx';
 import FundTransferModal from './FundTransferModal.jsx';
 import {
+  FUND_TRANSFER_ACTION_OPTIONS,
+  FUND_TRANSFER_REQUEST_TYPE_OPTIONS,
   canUserApproveTransfer,
   canUserResubmitTransfer,
   canUserReturnTransfer,
   formatApiValidationErrors,
+  getFundTransferOptionLabel,
 } from '../utils/fundTransferUtils.js';
 import {
   FUND_TRANSFER_STATUS,
@@ -71,6 +74,17 @@ const DETAIL_TAB = Object.freeze({
 });
 
 const hasFieldValue = (value) => value != null && value !== '';
+
+const formatDate = (value) => {
+  if (!hasFieldValue(value)) return null;
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return String(value);
+  return d.toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
+};
 
 const formatDateTime = (value) => {
   if (!hasFieldValue(value)) return null;
@@ -600,6 +614,18 @@ export default function FundTransferDetailsModal({
 
                   <DetailSection title="Request Information">
                         <div className="grid gap-x-6 gap-y-1 sm:grid-cols-2 lg:grid-cols-3">
+                          <ReadOnlyField
+                            label="Request Type"
+                            value={getFundTransferOptionLabel(
+                              FUND_TRANSFER_REQUEST_TYPE_OPTIONS,
+                              transfer.request_type
+                            )}
+                          />
+                          <ReadOnlyField
+                            label="Action"
+                            value={getFundTransferOptionLabel(FUND_TRANSFER_ACTION_OPTIONS, transfer.action)}
+                          />
+                          <ReadOnlyField label="Date" value={formatDate(transfer.request_date)} />
                           <ReadOnlyField label="Submitted By" value={transfer.submitted_by} />
                           <ReadOnlyField label="Created By" value={transfer.created_by} />
                           <ReadOnlyField label="Created At" value={formatDateTime(transfer.created_at)} />

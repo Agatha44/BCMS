@@ -1128,7 +1128,7 @@ export default function AccountsManagement() {
             type="button"
             onClick={() => openViewModal(account)}
             disabled={loadingViewId === account.id}
-            className="inline-flex items-center space-x-1 rounded-lg px-3 py-1.5 text-sm text-white disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex items-center rounded-lg px-3 py-1.5 text-sm text-white disabled:cursor-not-allowed disabled:opacity-50"
             style={{ backgroundColor: BRAND }}
             onMouseEnter={(e) => {
               if (!e.currentTarget.disabled) e.currentTarget.style.backgroundColor = BRAND_DARK;
@@ -1138,8 +1138,7 @@ export default function AccountsManagement() {
             }}
             title="View Account Details"
           >
-            <Eye size={16} className="text-white" />
-            <span>View</span>
+            View
           </button>
         ),
       },
@@ -1716,8 +1715,8 @@ export default function AccountsManagement() {
         destroyOnHidden
         title={null}
         closable={false}
-        maskClosable={!creating && !showOtpModal}
-        keyboard={!creating && !showOtpModal}
+        maskClosable={false}
+        keyboard={false}
         className="brand-modal"
         styles={{ body: { padding: 0 }, content: { padding: 0, overflow: 'hidden' } }}
       >
@@ -1827,8 +1826,8 @@ export default function AccountsManagement() {
         destroyOnHidden
         title={null}
         closable={false}
-        maskClosable={!verifyingOtp && !sendingOtp}
-        keyboard={!verifyingOtp && !sendingOtp}
+        maskClosable={false}
+        keyboard={false}
         zIndex={1100}
         className="brand-modal"
         styles={{ body: { padding: 0 }, content: { padding: 0, overflow: 'hidden' } }}
