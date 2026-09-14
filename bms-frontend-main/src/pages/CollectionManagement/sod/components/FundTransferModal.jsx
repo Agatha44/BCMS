@@ -1,22 +1,36 @@
 import { useEffect, useState } from 'react';
 import { ArrowRightLeft } from 'lucide-react';
 import { UploadOutlined } from '@ant-design/icons';
-import { Button, DatePicker, Form, Input, InputNumber, Modal, Select, Upload } from 'antd';
+import { Button, Form, Input, Modal, Upload } from 'antd';
 import Swal from 'sweetalert2';
-import dayjs from 'dayjs';
 import { formatCurrency } from '../../../../common/utils/numberFormat.js';
 import BrandModalHeader from './BrandModalHeader.jsx';
 import CollectionLoader from '../../components/CollectionLoader.jsx';
 import { apiService } from '../../../../services/api.jsx';
-import {
-  FUND_TRANSFER_ACTION_OPTIONS,
-  FUND_TRANSFER_REQUEST_TYPE_OPTIONS,
-  formatApiValidationErrors,
-} from '../utils/fundTransferUtils.js';
+import { formatApiValidationErrors } from '../utils/fundTransferUtils.js';
 
+const fireAlert = (options) => {
+  const isFailure = options.icon === 'error' || options.icon === 'warning';
+  return Swal.fire({
+    confirmButtonText: 'Close',
+    ...options,
+    ...(isFailure ? { title: 'Failed' } : {}),
+  });
+};
+
+const DEFAULT_REQUEST_TYPE = 'fund_transfer';
+const DEFAULT_ACTION = 'cashless_to_cashless';
 const BRAND = '#962E32';
 const BRAND_DARK = '#7A2326';
 const EMPTY_VALUE = 'N/A';
+
+const todayIsoDate = () => {
+  const d = new Date();
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+};
 
 
 const getAccountName = (account) => {
@@ -29,7 +43,7 @@ const MAX_APPROVAL_PDF_SIZE_BYTES = 10 * 1024 * 1024;
 const ACCEPTED_FILE_TYPES = '.pdf,application/pdf';
 
 const validateApprovalPdf = (file) => {
-  if (!file) return 'An approval PDF document is required';
+  if (!file) return 'A supporting PDF document is required';
   const isPdf =
     file.type === 'application/pdf' ||
     String(file.name || '')
@@ -291,24 +305,12 @@ export default function FundTransferModal({
       setToLoading(false);
       setFromAccountNo(String(initialTransfer.from_account_no ?? ''));
       setToAccountNo(String(initialTransfer.to_account_no ?? ''));
-      form.setFieldsValue({
-        request_type: initialTransfer.request_type || undefined,
-        action: initialTransfer.action || undefined,
-        request_date: initialTransfer.request_date ? dayjs(initialTransfer.request_date) : dayjs(),
-        amount: initialTransfer.amount != null ? Number(initialTransfer.amount) : undefined,
-      });
       return;
     }
 
     resetState();
-    form.setFieldsValue({ request_date: dayjs() });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, isResubmit, transferId, initialTransfer]);
-
-  useEffect(() => {
-    if (!isOpen || !fromAccount) return;
-    form.validateFields(['amount']).catch(() => {});
-  }, [fromAccount, form, isOpen]);
 
   const handleClose = () => {
     if (submitting) return;
@@ -316,9 +318,9 @@ export default function FundTransferModal({
     onClose?.();
   };
 
-  const handleSubmit = async (values) => {
+  const handleSubmit = async () => {
     if (fromLoading || toLoading) {
-      await Swal.fire({
+      await fireAlert({
         icon: 'info',
         title: 'Please wait',
         text: 'Account details are still loading.',
@@ -327,7 +329,7 @@ export default function FundTransferModal({
     }
 
     if (!fromAccount) {
-      await Swal.fire({
+      await fireAlert({
         icon: 'warning',
         title: 'From account required',
         text: fromError || 'Enter a valid source account number.',
@@ -335,7 +337,7 @@ export default function FundTransferModal({
       return;
     }
     if (!toAccount) {
-      await Swal.fire({
+      await fireAlert({
         icon: 'warning',
         title: 'To account required',
         text: toError || 'Enter a valid destination account number.',
@@ -346,7 +348,7 @@ export default function FundTransferModal({
     const fromNo = String(fromAccount.account_no || '').trim();
     const toNo = String(toAccount.account_no || '').trim();
     if (fromNo === toNo || (fromAccount.account_no != null && toAccount.account_no != null && String(fromAccount.account_no) === String(toAccount.account_no))) {
-      await Swal.fire({
+      await fireAlert({
         icon: 'warning',
         title: 'Invalid transfer',
         text: 'Source and destination accounts must be different.',
@@ -354,15 +356,21 @@ export default function FundTransferModal({
       return;
     }
 
-    const amount = Number(values.amount);
+    const fromBalance = Number(fromAccount.account_balance ?? 0);
+    const amount = isResubmit && initialTransfer?.amount != null
+      ? Number(initialTransfer.amount)
+      : fromBalance;
     if (!Number.isFinite(amount) || amount <= 0) {
-      await Swal.fire({ icon: 'warning', title: 'Invalid amount', text: 'Please enter a valid transfer amount.' });
+      await fireAlert({
+        icon: 'warning',
+        title: 'Invalid amount',
+        text: 'The source account has no balance to transfer.',
+      });
       return;
     }
 
-    const fromBalance = Number(fromAccount.account_balance ?? 0);
     if (amount > fromBalance) {
-      await Swal.fire({
+      await fireAlert({
         icon: 'warning',
         title: 'Insufficient balance',
         text: `Transfer amount cannot exceed the source account balance of ${formatCurrency(fromBalance)}.`,
@@ -373,16 +381,16 @@ export default function FundTransferModal({
     const files = fileList.map((f) => f.originFileObj).filter((f) => f instanceof File);
     const pdfError = validateApprovalPdf(files[0]);
     if (pdfError) {
-      await Swal.fire({
+      await fireAlert({
         icon: 'warning',
-        title: 'Approval document required',
+        title: 'Supporting document required',
         text: pdfError,
       });
       return;
     }
 
     if (isResubmit && transferId == null && initialTransfer?.id == null) {
-      await Swal.fire({
+      await fireAlert({
         icon: 'error',
         title: 'Resubmission failed',
         text: 'Transfer reference is missing.',
@@ -396,37 +404,37 @@ export default function FundTransferModal({
         from_account_id: fromAccount.account_no,
         to_account_id: toAccount.account_no,
         amount,
-        request_type: values.request_type,
-        action: values.action,
-        request_date: values.request_date ? values.request_date.format('YYYY-MM-DD') : undefined,
+        request_type: initialTransfer?.request_type || DEFAULT_REQUEST_TYPE,
+        action: initialTransfer?.action || DEFAULT_ACTION,
+        request_date: todayIsoDate(),
       };
 
       const res = isResubmit
         ? await apiService.resubmitFundTransfer(transferId ?? initialTransfer?.id, payload, files)
         : await apiService.submitFundTransfer(payload, files);
       if (!res?.success) {
-        await Swal.fire({
+        await fireAlert({
           icon: 'error',
           title: isResubmit ? 'Resubmission failed' : 'Submission failed',
           text: formatApiValidationErrors(
             { responseData: res, validationErrors: res?.data },
             res?.message ||
               (isResubmit
-                ? 'Could not resubmit fund transfer for approval.'
-                : 'Could not submit fund transfer for approval.')
+                ? 'Could not resubmit fund transfer for review.'
+                : 'Could not initiate fund transfer.')
           ),
         });
         return;
       }
 
-      await Swal.fire({
+      await fireAlert({
         icon: 'success',
-        title: isResubmit ? 'Resubmitted' : 'Submitted',
+        title: isResubmit ? 'Resubmitted' : 'Initiated',
         text:
           res.message ||
           (isResubmit
-            ? 'Fund transfer request resubmitted for approval.'
-            : 'Fund transfer request submitted for approval.'),
+            ? 'Fund transfer request resubmitted for Toll Supervisor review.'
+            : 'Fund transfer request initiated. Awaiting Toll Supervisor review.'),
         timer: 2500,
         showConfirmButton: false,
       });
@@ -435,7 +443,7 @@ export default function FundTransferModal({
       handleClose();
     } catch (err) {
       const message = formatApiValidationErrors(err, err?.message || 'An unexpected error occurred.');
-      await Swal.fire({
+      await fireAlert({
         icon: 'error',
         title: 'Error',
         html: String(message).replace(/\n/g, '<br />'),
@@ -462,7 +470,7 @@ export default function FundTransferModal({
       styles={{ body: { padding: 0 }, content: { padding: 0, overflow: 'hidden' } }}
     >
       <BrandModalHeader
-        title={isResubmit ? 'Resubmit Request Update-receipt' : 'Request Update-receipt'}
+        title={isResubmit ? 'Resubmit Update Pre-receipts' : 'Update Pre-receipts'}
         onClose={handleClose}
       />
 
@@ -478,45 +486,9 @@ export default function FundTransferModal({
             <ArrowRightLeft size={16} className="shrink-0" />
             <span>
               {isResubmit
-                ? 'Update the transfer details and upload a new approval PDF, then resubmit for review.'
-                : 'Transfer balance between accounts. The request requires approval before funds are moved.'}
+                ? 'Update the transfer details and upload a new supporting PDF, then resubmit for Toll Supervisor review.'
+                : 'Transfer balance between accounts. Toll Registrar initiates, Toll Supervisor reviews, Toll Accountant verifies, then Toll Approver approves before funds are moved.'}
             </span>
-          </div>
-
-          <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Form.Item
-              name="request_type"
-              label={
-                <span className="text-xs font-semibold tracking-[0.01em]" style={{ color: BRAND }}>
-                  Request Type
-                </span>
-              }
-              rules={[{ required: true, message: 'Please select a request type' }]}
-            >
-              <Select
-                placeholder="Select request type"
-                options={FUND_TRANSFER_REQUEST_TYPE_OPTIONS}
-                disabled={submitting}
-                className="!w-full"
-              />
-            </Form.Item>
-
-            <Form.Item
-              name="action"
-              label={
-                <span className="text-xs font-semibold tracking-[0.01em]" style={{ color: BRAND }}>
-                  Action
-                </span>
-              }
-              rules={[{ required: true, message: 'Please select an action' }]}
-            >
-              <Select
-                placeholder="Select action"
-                options={FUND_TRANSFER_ACTION_OPTIONS}
-                disabled={submitting}
-                className="!w-full"
-              />
-            </Form.Item>
           </div>
 
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -540,80 +512,19 @@ export default function FundTransferModal({
             />
           </div>
 
-          <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Form.Item
-              name="amount"
-              label={
-                <span className="text-xs font-semibold tracking-[0.01em]" style={{ color: BRAND }}>
-                  Transfer Amount
-                </span>
-              }
-              rules={[
-                { required: true, message: 'Please enter the transfer amount' },
-                {
-                  validator: (_, value) => {
-                    const n = Number(value);
-                    if (!Number.isFinite(n) || n <= 0) {
-                      return Promise.reject(new Error('Amount must be greater than zero'));
-                    }
-                    if (fromAccount) {
-                      const fromBalance = Number(fromAccount.account_balance);
-                      if (n > fromBalance) {
-                        return Promise.reject(
-                          new Error(
-                            `Amount cannot exceed source balance of ${formatCurrency(fromBalance)}`
-                          )
-                        );
-                      }
-                    }
-                    return Promise.resolve();
-                  },
-                },
-              ]}
-            >
-              <InputNumber
-                className="!w-full !rounded-lg"
-                min={1}
-                precision={0}
-                placeholder="Enter amount"
-                disabled={submitting}
-                formatter={(v) => `${v}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                parser={(v) => v.replace(/,/g, '')}
-              />
-            </Form.Item>
-
-            <Form.Item
-              name="request_date"
-              label={
-                <span className="text-xs font-semibold tracking-[0.01em]" style={{ color: BRAND }}>
-                  Date
-                </span>
-              }
-              rules={[{ required: true, message: 'Please select a date' }]}
-            >
-              <DatePicker
-                className="!w-full !rounded-lg"
-                format="DD/MM/YYYY"
-                placeholder="Select date"
-                disabled={submitting}
-                disabledDate={(current) => current && current > dayjs().endOf('day')}
-              />
-            </Form.Item>
-          </div>
-
-          <div className="mt-2">
+          <div className="mt-6">
             <span className="mb-2 block text-xs font-semibold tracking-[0.01em]" style={{ color: BRAND }}>
-              Approval Document <span className="text-red-600">*</span>
+              Supporting Document <span className="text-red-600">*</span>
             </span>
             <p className="mb-2 text-xs text-slate-500">
-              Upload the approval PDF (max 10MB). Required before {isResubmit ? 'resubmission' : 'submission'}.
+              Upload the supporting PDF (max 10MB). Required before {isResubmit ? 'resubmission' : 'submission'}.
             </p>
             <Upload
               fileList={fileList}
               beforeUpload={(file) => {
                 const pdfValidationError = validateApprovalPdf(file);
                 if (pdfValidationError) {
-                  Swal.fire({ icon: 'warning', title: 'Invalid file', text: pdfValidationError });
+                  fireAlert({ icon: 'warning', title: 'Invalid file', text: pdfValidationError });
                   return Upload.LIST_IGNORE;
                 }
                 return false;
@@ -648,7 +559,7 @@ export default function FundTransferModal({
               e.currentTarget.style.borderColor = BRAND;
             }}
           >
-            {isResubmit ? 'Resubmit Transfer' : 'Initiate'}
+            {isResubmit ? 'Resubmit Transfer' : 'Update'}
           </Button>
           <Button onClick={handleClose} disabled={submitting}>
             Close

@@ -83,6 +83,7 @@ include __DIR__ . '/api/ussd.php';
 include __DIR__ . '/api/erms.php';
 include __DIR__ . '/api/payroll.php';
 include __DIR__ . '/api/overtime.php';
+include __DIR__ . '/api/leave.php';
 include __DIR__ . '/api/collection.php';
 include __DIR__ . '/api/report_engine.php';
 
@@ -260,6 +261,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('accounts/transfer/history', [AccountTransferController::class, 'listTransferHistory'])->name('accounts-transfer-history');
     Route::get('accounts/transfer/history/{id}', [AccountTransferController::class, 'getTransferHistory'])->name('accounts-transfer-history-show');
     Route::get('accounts/transfer/{id}/approval-document', [AccountTransferController::class, 'downloadApprovalDocument'])->name('accounts-transfer-approval-document');
+    Route::post('accounts/transfer/{id}/review', [AccountTransferController::class, 'review'])->name('accounts-transfer-review');
+    Route::post('accounts/transfer/{id}/verify', [AccountTransferController::class, 'verify'])->name('accounts-transfer-verify');
     Route::post('accounts/transfer/{id}/approve', [AccountTransferController::class, 'approve'])->name('accounts-transfer-approve');
     Route::post('accounts/transfer/{id}/reject', [AccountTransferController::class, 'reject'])->name('accounts-transfer-reject');
     Route::post('accounts/transfer/{id}/return', [AccountTransferController::class, 'returnTransfer'])->name('accounts-transfer-return');

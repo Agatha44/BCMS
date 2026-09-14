@@ -31,6 +31,7 @@ const HARDCODED_ROLES = [
     'Toll Administrator',
     'Toll Accountant',
     'Employee',
+    'Employee Administrator',
     'Employee Approver',
     'Employee Registrar',
     'Overtime Applicant',

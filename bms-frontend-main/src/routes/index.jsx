@@ -65,6 +65,9 @@ import PriceManagementPage from '../pages/CollectionManagement/sod/PriceManageme
 import ReceiptManagementPage from '../pages/CollectionManagement/sod/ReceiptManagementPage.jsx';
 import PreReceiptManagementPage from '../pages/CollectionManagement/sod/PreReceiptManagementPage.jsx';
 import ReconciliationManagementPage from '../pages/CollectionManagement/sod/ReconciliationManagementPage.jsx';
+import LeaveApplication from '../pages/LeaveManagement/LeaveApplication.jsx';
+import LeaveBalance from '../pages/LeaveManagement/LeaveBalance.jsx';
+import LeaveReports from '../pages/LeaveManagement/LeaveReports.jsx';
 
 export default function AppRoutes() {
     return useRoutes([
@@ -217,11 +220,45 @@ export default function AppRoutes() {
         )
       },
       {
+        path: '/leave-management',
+        element: <Navigate to="/leave-management/dashboard" replace />,
+      },
+      {
         path: '/leave-management/dashboard',
         element: (
           <ProtectedRoute>
             <Layout>
               <Dashboard />
+            </Layout>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/leave-management/application',
+        element: (
+          <ProtectedRoute>
+            <Layout>
+              <LeaveApplication />
+            </Layout>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/leave-management/balance',
+        element: (
+          <ProtectedRoute>
+            <Layout>
+              <LeaveBalance />
+            </Layout>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/leave-management/reports',
+        element: (
+          <ProtectedRoute>
+            <Layout>
+              <LeaveReports />
             </Layout>
           </ProtectedRoute>
         )

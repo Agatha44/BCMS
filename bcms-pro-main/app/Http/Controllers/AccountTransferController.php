@@ -23,7 +23,7 @@ class AccountTransferController extends BasicController
     ) {}
 
     /**
-     * Submit a transfer for approval (no balance movement until approved).
+     * Initiate a transfer (no balance movement until Toll Approver approves).
      */
     public function transfer(Request $request): JsonResponse
     {
@@ -86,6 +86,36 @@ class AccountTransferController extends BasicController
         return $this->workflowResult($result);
     }
 
+    public function review(Request $request, int $id): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'comment' => 'required|string|min:3|max:500',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->sendError('Validation failed', $validator->errors()->toArray(), 0, 422);
+        }
+
+        $result = $this->workflowService->review($id, $validator->validated()['comment'], (int) auth()->id());
+
+        return $this->workflowResult($result);
+    }
+
+    public function verify(Request $request, int $id): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'comment' => 'required|string|min:3|max:500',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->sendError('Validation failed', $validator->errors()->toArray(), 0, 422);
+        }
+
+        $result = $this->workflowService->verify($id, $validator->validated()['comment'], (int) auth()->id());
+
+        return $this->workflowResult($result);
+    }
+
     public function approve(Request $request, int $id): JsonResponse
     {
         $validator = Validator::make($request->all(), [
@@ -132,11 +162,26 @@ class AccountTransferController extends BasicController
     }
 
     /**
-     * Approver queue: pending transfers awaiting action.
+     * Checker queue: transfers awaiting the current role's action.
      */
     public function listPendingTransfers(Request $request): JsonResponse
     {
-        if (!$this->workflowService->isApprover()) {
+        $validator = Validator::make($request->all(), [
+            'page' => 'nullable|integer|min:1',
+            'per_page' => 'nullable|integer|min:1|max:100',
+            'role' => 'nullable|string|max:64',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->sendError('Validation failed', $validator->errors()->toArray(), 0, 422);
+        }
+
+        $queueStatuses = $this->workflowService->queueStatusesForUser(
+            $request->input('role'),
+            (int) auth()->id()
+        );
+
+        if ($queueStatuses === []) {
             return $this->sendError(
                 'You do not have permission to view pending account transfers.',
                 [],
@@ -145,20 +190,11 @@ class AccountTransferController extends BasicController
             );
         }
 
-        $validator = Validator::make($request->all(), [
-            'page' => 'nullable|integer|min:1',
-            'per_page' => 'nullable|integer|min:1|max:100',
-        ]);
-
-        if ($validator->fails()) {
-            return $this->sendError('Validation failed', $validator->errors()->toArray(), 0, 422);
-        }
-
         try {
             $perPage = max(1, min(100, (int) $request->input('per_page', 15)));
             $page = max(1, (int) $request->input('page', 1));
 
-            $paginator = $this->buildTransferListQuery(AccountTransferStatus::PENDING)
+            $paginator = $this->buildTransferListQuery($queueStatuses)
                 ->orderBy('t.created_at')
                 ->orderBy('t.id')
                 ->paginate($perPage, ['*'], 'page', $page);
@@ -201,7 +237,7 @@ class AccountTransferController extends BasicController
             $page = max(1, (int) $request->input('page', 1));
             $status = $request->input('status', 'all');
 
-            $query = $this->buildTransferListQuery($status === 'all' ? null : $status)
+            $query = $this->buildTransferListQuery($status === 'all' ? null : [$status])
                 ->orderByDesc('t.created_at')
                 ->orderByDesc('t.id');
 
@@ -261,9 +297,9 @@ class AccountTransferController extends BasicController
 
         $userId = (int) auth()->id();
         $isSubmitter = (int) $transfer->created_by === $userId;
-        $isApprover = $this->workflowService->isApprover($userId);
+        $isParticipant = $this->workflowService->isWorkflowParticipant($userId);
 
-        if (!$isSubmitter && !$isApprover) {
+        if (!$isSubmitter && !$isParticipant) {
             return $this->sendError(
                 'You do not have permission to download this approval document.',
                 [],
@@ -279,12 +315,17 @@ class AccountTransferController extends BasicController
         }
     }
 
-    private function buildTransferListQuery(?string $status)
+    /**
+     * @param string[]|null $statuses
+     */
+    private function buildTransferListQuery(?array $statuses)
     {
         $query = DB::table('account_transfer as t')
             ->leftJoin('account as from_acc', 'from_acc.account_no', '=', 't.from_account_id')
             ->leftJoin('account as to_acc', 'to_acc.account_no', '=', 't.to_account_id')
             ->leftJoin('auth_user as creator', 'creator.id', '=', 't.created_by')
+            ->leftJoin('auth_user as reviewer', 'reviewer.id', '=', 't.reviewed_by')
+            ->leftJoin('auth_user as verifier', 'verifier.id', '=', 't.verified_by')
             ->leftJoin('auth_user as approver', 'approver.id', '=', 't.approved_by')
             ->leftJoin('auth_user as rejector', 'rejector.id', '=', 't.rejected_by')
             ->leftJoin('auth_user as returner', 'returner.id', '=', 't.returned_by')
@@ -296,13 +337,15 @@ class AccountTransferController extends BasicController
                 DB::raw("TRIM(CONCAT_WS(' ', to_acc.first_name, to_acc.middle_name, to_acc.surname)) as to_account_name"),
                 DB::raw($this->authUserNameSelect('creator', 'created_by')),
                 DB::raw($this->authUserNameSelect('creator', 'submitted_by')),
+                DB::raw($this->authUserNameSelect('reviewer', 'reviewed_by')),
+                DB::raw($this->authUserNameSelect('verifier', 'verified_by')),
                 DB::raw($this->authUserNameSelect('approver', 'approved_by')),
                 DB::raw($this->authUserNameSelect('rejector', 'rejected_by')),
                 DB::raw($this->authUserNameSelect('returner', 'returned_by')),
             ]);
 
-        if ($status !== null) {
-            $query->where('t.status', $status);
+        if ($statuses !== null) {
+            $query->whereIn('t.status', $statuses);
         }
 
         return $query;
@@ -330,6 +373,8 @@ class AccountTransferController extends BasicController
                 'to_account_name' => $transfer->to_account_name ?? null,
                 'created_by' => $transfer->created_by ?? null,
                 'submitted_by' => $transfer->submitted_by ?? null,
+                'reviewed_by' => $transfer->reviewed_by ?? null,
+                'verified_by' => $transfer->verified_by ?? null,
                 'approved_by' => $transfer->approved_by ?? null,
                 'rejected_by' => $transfer->rejected_by ?? null,
                 'returned_by' => $transfer->returned_by ?? null,

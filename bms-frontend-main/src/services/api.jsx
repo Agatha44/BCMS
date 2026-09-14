@@ -1410,7 +1410,7 @@ class ApiService {
   async getPendingFundTransfers(params = {}) {
     const queryParams = new URLSearchParams();
 
-    const allowedKeys = ['page', 'per_page', 'search', 'sort_by', 'sort_order'];
+    const allowedKeys = ['page', 'per_page', 'search', 'sort_by', 'sort_order', 'role'];
     allowedKeys.forEach((key) => {
       const value = params[key];
       if (value !== undefined && value !== null && value !== '') {
@@ -1444,6 +1444,20 @@ class ApiService {
     }
 
     return this.request('/api/accounts/transfer', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  }
+
+  async reviewFundTransfer(id, data = {}) {
+    return this.request(`/api/accounts/transfer/${id}/review`, {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  }
+
+  async verifyFundTransfer(id, data = {}) {
+    return this.request(`/api/accounts/transfer/${id}/verify`, {
       method: 'POST',
       body: JSON.stringify(data)
     });

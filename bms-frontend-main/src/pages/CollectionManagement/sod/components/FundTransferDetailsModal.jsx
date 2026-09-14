@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ArrowRight, CheckCircle, RotateCcw, Undo2, XCircle } from 'lucide-react';
+import { ArrowRight, CheckCircle, ClipboardCheck, RotateCcw, ShieldCheck, Undo2, XCircle } from 'lucide-react';
 import { Button, Input, Modal, Tabs, Tag, message } from 'antd';
 import { useSelector } from 'react-redux';
 import Swal from 'sweetalert2';
@@ -15,26 +15,51 @@ import {
   FUND_TRANSFER_ACTION_OPTIONS,
   FUND_TRANSFER_REQUEST_TYPE_OPTIONS,
   canUserApproveTransfer,
+  canUserRejectTransfer,
   canUserResubmitTransfer,
+  canUserReviewTransfer,
   canUserReturnTransfer,
+  canUserVerifyTransfer,
   formatApiValidationErrors,
+  getFundTransferAwaitingMessage,
   getFundTransferOptionLabel,
 } from '../utils/fundTransferUtils.js';
 import {
   FUND_TRANSFER_STATUS,
+  getTransferStatusDisplayLabel,
   getTransferStatusTagColor,
-  isTransferPending,
+  isTransferInProgress,
   isTransferReturned,
   normalizeTransferStatus,
 } from '../utils/fundTransferStatus.js';
 
 const WORKFLOW_ACTION = Object.freeze({
+  REVIEW: 'review',
+  VERIFY: 'verify',
   APPROVE: 'approve',
   REJECT: 'reject',
   RETURN: 'return',
 });
 
 const WORKFLOW_ACTION_META = {
+  [WORKFLOW_ACTION.REVIEW]: {
+    errorTitle: 'Review failed',
+    successTitle: 'Reviewed',
+    successText: 'reviewed',
+    confirmLabel: 'Confirm review',
+    commentLabel: 'Review comment (required)',
+    placeholder: 'Enter your review comment',
+    emptyCommentWarning: 'Please provide a review comment',
+  },
+  [WORKFLOW_ACTION.VERIFY]: {
+    errorTitle: 'Verification failed',
+    successTitle: 'Verified',
+    successText: 'verified',
+    confirmLabel: 'Confirm verification',
+    commentLabel: 'Verification comment (required)',
+    placeholder: 'Enter your verification comment',
+    emptyCommentWarning: 'Please provide a verification comment',
+  },
   [WORKFLOW_ACTION.APPROVE]: {
     errorTitle: 'Approval failed',
     successTitle: 'Approved',
@@ -255,13 +280,27 @@ export default function FundTransferDetailsModal({
     return undefined;
   }, [isOpen, transferId, initialTransfer, loadTransfer]);
 
-  const statusLabel = transfer?.status ?? EMPTY_VALUE;
+  const statusLabel = getTransferStatusDisplayLabel(transfer) || EMPTY_VALUE;
   const statusKey = normalizeTransferStatus(transfer);
-  const pending = isTransferPending(transfer);
+  const inProgress = isTransferInProgress(transfer);
   const returned = isTransferReturned(transfer);
+  const canReview = canUserReviewTransfer(transfer, currentUser, selectedRole);
+  const canVerify = canUserVerifyTransfer(transfer, currentUser, selectedRole);
   const canApprove = canUserApproveTransfer(transfer, currentUser, selectedRole);
+  const canReject = canUserRejectTransfer(transfer, currentUser, selectedRole);
   const canReturn = canUserReturnTransfer(transfer, currentUser, selectedRole);
-  const canResubmit = canUserResubmitTransfer(transfer, currentUser);
+  const canResubmit = canUserResubmitTransfer(transfer, currentUser, selectedRole);
+  const awaitingMessage = getFundTransferAwaitingMessage(transfer, currentUser, selectedRole);
+
+  const showReviewSection =
+    hasFieldValue(transfer?.reviewed_by) ||
+    hasFieldValue(transfer?.reviewed_at) ||
+    hasFieldValue(transfer?.review_comment);
+
+  const showVerifySection =
+    hasFieldValue(transfer?.verified_by) ||
+    hasFieldValue(transfer?.verified_at) ||
+    hasFieldValue(transfer?.verification_comment);
 
   const showApprovalSection =
     hasFieldValue(transfer?.approved_by) ||
@@ -302,20 +341,25 @@ export default function FundTransferDetailsModal({
       const payload = { comment: trimmedComment };
 
       const res =
-        approvalAction === WORKFLOW_ACTION.APPROVE
-          ? await apiService.approveFundTransfer(transfer.id, payload)
-          : approvalAction === WORKFLOW_ACTION.REJECT
-            ? await apiService.rejectFundTransfer(transfer.id, payload)
-            : await apiService.returnFundTransfer(transfer.id, payload);
+        approvalAction === WORKFLOW_ACTION.REVIEW
+          ? await apiService.reviewFundTransfer(transfer.id, payload)
+          : approvalAction === WORKFLOW_ACTION.VERIFY
+            ? await apiService.verifyFundTransfer(transfer.id, payload)
+            : approvalAction === WORKFLOW_ACTION.APPROVE
+              ? await apiService.approveFundTransfer(transfer.id, payload)
+              : approvalAction === WORKFLOW_ACTION.REJECT
+                ? await apiService.rejectFundTransfer(transfer.id, payload)
+                : await apiService.returnFundTransfer(transfer.id, payload);
 
       if (!res?.success) {
         await Swal.fire({
           icon: 'error',
-          title: actionMeta.errorTitle,
+          title: 'Failed',
           text: formatApiValidationErrors(
             { responseData: res, validationErrors: res?.data },
             res?.message || 'Could not process this request.'
           ),
+          confirmButtonText: 'Close',
         });
         return;
       }
@@ -335,8 +379,9 @@ export default function FundTransferDetailsModal({
     } catch (err) {
       await Swal.fire({
         icon: 'error',
-        title: 'Error',
+        title: 'Failed',
         text: formatApiValidationErrors(err, err?.message || 'An unexpected error occurred.'),
+        confirmButtonText: 'Close',
       });
     } finally {
       setApprovalLoading(false);
@@ -476,27 +521,70 @@ export default function FundTransferDetailsModal({
 
     return (
       <div className="flex w-full flex-wrap items-center justify-end gap-2">
+        {canReview ? (
+          <Button
+            type="primary"
+            icon={<ClipboardCheck size={14} />}
+            onClick={() => {
+              setApprovalAction(WORKFLOW_ACTION.REVIEW);
+              setComment('');
+            }}
+            style={{ backgroundColor: BRAND, borderColor: BRAND }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = BRAND_DARK;
+              e.currentTarget.style.borderColor = BRAND_DARK;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = BRAND;
+              e.currentTarget.style.borderColor = BRAND;
+            }}
+          >
+            Review
+          </Button>
+        ) : null}
+        {canVerify ? (
+          <Button
+            type="primary"
+            icon={<ShieldCheck size={14} />}
+            onClick={() => {
+              setApprovalAction(WORKFLOW_ACTION.VERIFY);
+              setComment('');
+            }}
+            style={{ backgroundColor: BRAND, borderColor: BRAND }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = BRAND_DARK;
+              e.currentTarget.style.borderColor = BRAND_DARK;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = BRAND;
+              e.currentTarget.style.borderColor = BRAND;
+            }}
+          >
+            Verify
+          </Button>
+        ) : null}
         {canApprove ? (
-          <>
-            <Button
-              type="primary"
-              icon={<CheckCircle size={14} />}
-              onClick={() => {
-                setApprovalAction(WORKFLOW_ACTION.APPROVE);
-                setComment('');
-              }}
-              style={{ backgroundColor: BRAND, borderColor: BRAND }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = BRAND_DARK;
-                e.currentTarget.style.borderColor = BRAND_DARK;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = BRAND;
-                e.currentTarget.style.borderColor = BRAND;
-              }}
-            >
-              Approve
-            </Button>
+          <Button
+            type="primary"
+            icon={<CheckCircle size={14} />}
+            onClick={() => {
+              setApprovalAction(WORKFLOW_ACTION.APPROVE);
+              setComment('');
+            }}
+            style={{ backgroundColor: BRAND, borderColor: BRAND }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = BRAND_DARK;
+              e.currentTarget.style.borderColor = BRAND_DARK;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = BRAND;
+              e.currentTarget.style.borderColor = BRAND;
+            }}
+          >
+            Approve
+          </Button>
+        ) : null}
+        {canReject ? (
             <Button
               danger
               type="primary"
@@ -508,6 +596,8 @@ export default function FundTransferDetailsModal({
             >
               Reject
             </Button>
+        ) : null}
+        {canReturn ? (
             <Button
               icon={<Undo2 size={14} />}
               onClick={() => {
@@ -518,7 +608,6 @@ export default function FundTransferDetailsModal({
             >
               Return
             </Button>
-          </>
         ) : null}
         {canResubmit ? (
           <Button
@@ -538,16 +627,14 @@ export default function FundTransferDetailsModal({
             Resubmit
           </Button>
         ) : null}
-        {pending && !canApprove && !canReturn ? (
+        {inProgress && !canReview && !canVerify && !canApprove && !canReturn ? (
           <span className="mr-auto text-xs text-amber-800">
-            {transfer?.submitted_by
-              ? 'You cannot approve your own transfer request.'
-              : 'Awaiting approver action.'}
+            {awaitingMessage || 'Awaiting the next workflow action.'}
           </span>
         ) : null}
         {returned && !canResubmit ? (
           <span className="mr-auto text-xs text-amber-800">
-            This returned transfer can only be resubmitted by the original requester.
+            This returned transfer can only be resubmitted by the original Toll Registrar.
           </span>
         ) : null}
         <Button onClick={onClose}>Close</Button>
@@ -635,6 +722,26 @@ export default function FundTransferDetailsModal({
                         </div>
                       </DetailSection>
 
+                      {showReviewSection ? (
+                        <DetailSection title="Review Details">
+                          <div className="grid gap-x-6 gap-y-1 sm:grid-cols-2 lg:grid-cols-3">
+                            <ReadOnlyField label="Reviewed By" value={transfer.reviewed_by} />
+                            <ReadOnlyField label="Reviewed At" value={formatDateTime(transfer.reviewed_at)} />
+                            <ReadOnlyField label="Review Comment" value={transfer.review_comment} />
+                          </div>
+                        </DetailSection>
+                      ) : null}
+
+                      {showVerifySection ? (
+                        <DetailSection title="Verification Details">
+                          <div className="grid gap-x-6 gap-y-1 sm:grid-cols-2 lg:grid-cols-3">
+                            <ReadOnlyField label="Verified By" value={transfer.verified_by} />
+                            <ReadOnlyField label="Verified At" value={formatDateTime(transfer.verified_at)} />
+                            <ReadOnlyField label="Verification Comment" value={transfer.verification_comment} />
+                          </div>
+                        </DetailSection>
+                      ) : null}
+
                       {showApprovalSection ? (
                         <DetailSection title="Approval Details">
                           <div className="grid gap-x-6 gap-y-1 sm:grid-cols-2 lg:grid-cols-3">
@@ -670,8 +777,8 @@ export default function FundTransferDetailsModal({
                         <CollectionLoader size={64} compact />
                       ) : details.length === 0 ? (
                         <p className="py-6 text-center text-sm text-slate-500">
-                          {pending
-                            ? 'No ledger entries yet. Balances will update after approval.'
+                          {inProgress
+                            ? 'No ledger entries yet. Balances will update after the Toll Approver approves.'
                             : 'No ledger entries for this transfer.'}
                         </p>
                       ) : (

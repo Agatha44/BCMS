@@ -1,18 +1,28 @@
-import { isTransferPending, isTransferReturned } from './fundTransferStatus.js';
+import {
+  isTransferPending,
+  isTransferReviewed,
+  isTransferReturned,
+  isTransferVerified,
+} from './fundTransferStatus.js';
 
-export { getTransferStatusLabel, isTransferPending, isTransferReturned } from './fundTransferStatus.js';
+export {
+  getTransferStatusDisplayLabel,
+  getTransferStatusLabel,
+  isTransferPending,
+  isTransferReviewed,
+  isTransferReturned,
+  isTransferVerified,
+} from './fundTransferStatus.js';
 
 export const FUND_TRANSFER_REQUEST_TYPE_OPTIONS = [
   { value: 'fund_transfer', label: 'Fund Transfer' },
- 
 ];
 
 export const FUND_TRANSFER_ACTION_OPTIONS = [
   { value: 'cashless_to_cashless', label: 'From Cashless Account-to Cashless Account' },
-  { value: 'cashless_to_pension', label: 'From Cashless Account-to Pension Account' },
-  { value: 'pension_to_cashless', label: 'From Pension Account-to Cashless Account' },
-  { value: 'bundle_to_cashless', label: 'From Bundle Account-to Cashless Account' },
-  { value: 'cashless_to_bundle', label: 'From Cashless Account-to Bundle Account' },
+  
+  
+  
 ];
 
 export const getFundTransferOptionLabel = (options, value) => {
@@ -21,16 +31,37 @@ export const getFundTransferOptionLabel = (options, value) => {
   return match?.label ?? String(value);
 };
 
-const FUND_TRANSFER_APPROVER_ROLES = [
-  'toll approver',
-  'toll supervisor',
-  'toll administrator',
-  'toll reviewer',
-];
+const normalizeRole = (selectedRole) => String(selectedRole || '').trim().toLowerCase();
 
-export const hasFundTransferApproverRole = (selectedRole) => {
-  const role = String(selectedRole || '').trim().toLowerCase();
-  return FUND_TRANSFER_APPROVER_ROLES.includes(role);
+export const FUND_TRANSFER_ROLE = Object.freeze({
+  REGISTRAR: 'toll registrar',
+  SUPERVISOR: 'toll supervisor',
+  ACCOUNTANT: 'toll accountant',
+  APPROVER: 'toll approver',
+});
+
+export const hasFundTransferInitiatorRole = (selectedRole) =>
+  normalizeRole(selectedRole) === FUND_TRANSFER_ROLE.REGISTRAR;
+
+export const hasFundTransferReviewerRole = (selectedRole) =>
+  normalizeRole(selectedRole) === FUND_TRANSFER_ROLE.SUPERVISOR;
+
+export const hasFundTransferVerifierRole = (selectedRole) =>
+  normalizeRole(selectedRole) === FUND_TRANSFER_ROLE.ACCOUNTANT;
+
+export const hasFundTransferApproverRole = (selectedRole) =>
+  normalizeRole(selectedRole) === FUND_TRANSFER_ROLE.APPROVER;
+
+export const hasFundTransferCheckerRole = (selectedRole) =>
+  hasFundTransferReviewerRole(selectedRole) ||
+  hasFundTransferVerifierRole(selectedRole) ||
+  hasFundTransferApproverRole(selectedRole);
+
+export const getFundTransferQueueActionLabel = (selectedRole) => {
+  if (hasFundTransferReviewerRole(selectedRole)) return 'Review';
+  if (hasFundTransferVerifierRole(selectedRole)) return 'Verify';
+  if (hasFundTransferApproverRole(selectedRole)) return 'Approve';
+  return 'View';
 };
 
 const getCurrentUserIdentities = (currentUser) =>
@@ -50,8 +81,26 @@ export const isCurrentUserTransferSubmitter = (transfer, currentUser) => {
   return getCurrentUserIdentities(currentUser).includes(submitter);
 };
 
-export const canUserApproveTransfer = (transfer, currentUser, selectedRole) => {
+const isOwnTransferBlocked = (transfer, currentUser) => {
+  if (transfer?.can_approve === false) return true;
+  if (isCurrentUserTransferSubmitter(transfer, currentUser)) return true;
+  return false;
+};
+
+export const canUserReviewTransfer = (transfer, currentUser, selectedRole) => {
   if (!transfer || !isTransferPending(transfer)) return false;
+  if (!hasFundTransferReviewerRole(selectedRole)) return false;
+  return !isOwnTransferBlocked(transfer, currentUser);
+};
+
+export const canUserVerifyTransfer = (transfer, currentUser, selectedRole) => {
+  if (!transfer || !isTransferReviewed(transfer)) return false;
+  if (!hasFundTransferVerifierRole(selectedRole)) return false;
+  return !isOwnTransferBlocked(transfer, currentUser);
+};
+
+export const canUserApproveTransfer = (transfer, currentUser, selectedRole) => {
+  if (!transfer || !isTransferVerified(transfer)) return false;
   if (!hasFundTransferApproverRole(selectedRole)) return false;
   if (transfer.can_approve === false) return false;
   if (transfer.can_approve === true) return true;
@@ -62,13 +111,38 @@ export const canUserApproveTransfer = (transfer, currentUser, selectedRole) => {
   return !getCurrentUserIdentities(currentUser).includes(submitter);
 };
 
-/** Approvers may return pending transfers they are allowed to review (same rules as approve). */
-export const canUserReturnTransfer = canUserApproveTransfer;
+export const canUserActOnTransferStage = (transfer, currentUser, selectedRole) =>
+  canUserReviewTransfer(transfer, currentUser, selectedRole) ||
+  canUserVerifyTransfer(transfer, currentUser, selectedRole) ||
+  canUserApproveTransfer(transfer, currentUser, selectedRole);
 
-/** Original submitter may resubmit after an approver returns the request. */
-export const canUserResubmitTransfer = (transfer, currentUser) => {
+/** The role that owns the current stage may reject or return the request. */
+export const canUserReturnTransfer = canUserActOnTransferStage;
+
+export const canUserRejectTransfer = canUserActOnTransferStage;
+
+/** Original registrar may resubmit after a checker returns the request. */
+export const canUserResubmitTransfer = (transfer, currentUser, selectedRole) => {
   if (!transfer || !isTransferReturned(transfer)) return false;
+  if (!hasFundTransferInitiatorRole(selectedRole)) return false;
   return isCurrentUserTransferSubmitter(transfer, currentUser);
+};
+
+export const getFundTransferAwaitingMessage = (transfer, currentUser, selectedRole) => {
+  if (!transfer) return '';
+  if (isOwnTransferBlocked(transfer, currentUser) && isTransferPending(transfer) && hasFundTransferReviewerRole(selectedRole)) {
+    return 'You cannot review your own transfer request.';
+  }
+  if (isOwnTransferBlocked(transfer, currentUser) && isTransferReviewed(transfer) && hasFundTransferVerifierRole(selectedRole)) {
+    return 'You cannot verify your own transfer request.';
+  }
+  if (isOwnTransferBlocked(transfer, currentUser) && isTransferVerified(transfer) && hasFundTransferApproverRole(selectedRole)) {
+    return 'You cannot approve your own transfer request.';
+  }
+  if (isTransferPending(transfer)) return 'Awaiting Toll Supervisor review.';
+  if (isTransferReviewed(transfer)) return 'Awaiting Toll Accountant verification.';
+  if (isTransferVerified(transfer)) return 'Awaiting Toll Approver approval.';
+  return '';
 };
 
 export const formatApiValidationErrors = (err, fallback = 'Request failed') => {

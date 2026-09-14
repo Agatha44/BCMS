@@ -640,7 +640,20 @@ const Dashboard = () => {
         <PlaceholderModuleDashboard
           icon={<CalendarOutlined className="dashboard-icon-large" />}
           title="Leave Management Dashboard"
-          description="Leave management features coming soon"
+          description="Apply for leave and review your leave balance"
+          actions={
+            <>
+              <Button type="primary" className="btn-standard-primary" onClick={() => navigate('/leave-management/application')}>
+                Manage Application
+              </Button>
+              <Button onClick={() => navigate('/leave-management/balance')}>
+                Manage Balance
+              </Button>
+              <Button onClick={() => navigate('/leave-management/reports')}>
+                Manage Reports
+              </Button>
+            </>
+          }
         />
       )}
 

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { AlertCircle, Eye } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import { Badge, Tabs, Tag } from 'antd';
 import DataTable from '../../../common/data/DataTable.jsx';
 import CollectionLoader from '../components/CollectionLoader.jsx';
@@ -9,15 +9,16 @@ import { formatMoney } from '../../../common/utils/numberFormat.js';
 import { apiService } from '../../../services/api.jsx';
 import FundTransferModal from './components/FundTransferModal.jsx';
 import FundTransferDetailsModal from './components/FundTransferDetailsModal.jsx';
-import { hasFundTransferApproverRole } from './utils/fundTransferUtils.js';
+import { hasFundTransferCheckerRole, hasFundTransferInitiatorRole, getFundTransferQueueActionLabel } from './utils/fundTransferUtils.js';
 import {
   FUND_TRANSFER_STATUS_TABS,
   STATUS_TAB_AFTER_SUBMIT,
   applyStatusTabToSearchParams,
   getDefaultStatusTab,
   getStatusTabFromSearchParams,
+  getTransferStatusDisplayLabel,
   getTransferStatusTagColor,
-  isPendingStatusTab,
+  isActionQueueTab,
   resolveApiStatusFromTab,
 } from './utils/fundTransferStatus.js';
 
@@ -54,9 +55,10 @@ export default function FundTransferList() {
   const location = useLocation();
   const navigate = useNavigate();
   const selectedRole = useSelector((state) => state.app.selectedRole);
-  const isApprover = hasFundTransferApproverRole(selectedRole);
+  const canInitiate = hasFundTransferInitiatorRole(selectedRole);
+  const hasCheckerRole = hasFundTransferCheckerRole(selectedRole);
 
-  const [activeStatusTab, setActiveStatusTab] = useState(() => getDefaultStatusTab(isApprover));
+  const [activeStatusTab, setActiveStatusTab] = useState(() => getDefaultStatusTab(selectedRole));
   const [pendingCount, setPendingCount] = useState(0);
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -83,7 +85,7 @@ export default function FundTransferList() {
     sort_order: 'desc',
   });
 
-  const isPendingTab = isPendingStatusTab(activeStatusTab);
+  const isQueueTab = isActionQueueTab(activeStatusTab, selectedRole);
 
   const updateFundTransferSearch = useCallback(
     (mutator) => {
@@ -101,7 +103,7 @@ export default function FundTransferList() {
     if (pageTab && pageTab !== 'fund-transfer') return;
 
     const fromUrl = getStatusTabFromSearchParams(params);
-    const nextTab = fromUrl ?? getDefaultStatusTab(isApprover);
+    const nextTab = fromUrl ?? getDefaultStatusTab(selectedRole);
 
     if (fromUrl == null) {
       updateFundTransferSearch((p) => applyStatusTabToSearchParams(p, nextTab));
@@ -110,10 +112,10 @@ export default function FundTransferList() {
     }
 
     setActiveStatusTab(nextTab);
-  }, [isApprover, location.search, updateFundTransferSearch]);
+  }, [selectedRole, location.search, updateFundTransferSearch]);
 
   const fetchPendingCount = useCallback(async () => {
-    if (!isApprover) {
+    if (!hasCheckerRole) {
       setPendingCount(0);
       return;
     }
@@ -122,6 +124,7 @@ export default function FundTransferList() {
       const res = await apiService.getPendingFundTransfers({
         per_page: 1,
         page: 1,
+        role: selectedRole,
       });
       if (res?.success && res.data) {
         setPendingCount(extractPaginationTotal(res.data));
@@ -131,7 +134,7 @@ export default function FundTransferList() {
     } catch {
       setPendingCount(0);
     }
-  }, [isApprover]);
+  }, [hasCheckerRole, selectedRole]);
 
   const fetchTransfers = useCallback(async () => {
     setLoading(true);
@@ -145,12 +148,10 @@ export default function FundTransferList() {
       };
       if (filters.search?.trim()) params.search = filters.search.trim();
 
-      const res = isPendingTab
-        ? await apiService.getPendingFundTransfers(params)
-        : await apiService.getFundTransfers({
-            ...params,
-            status: resolveApiStatusFromTab(activeStatusTab),
-          });
+      const res = await apiService.getFundTransfers({
+        ...params,
+        status: resolveApiStatusFromTab(activeStatusTab),
+      });
       if (res?.success && res.data) {
         const list = extractTransfers(res.data);
         setRows(list);
@@ -162,7 +163,7 @@ export default function FundTransferList() {
             total: 0,
           }
         );
-        if (isPendingTab && isApprover) {
+        if (isQueueTab && hasCheckerRole) {
           setPendingCount(extractPaginationTotal(res.data, list.length));
         }
       } else {
@@ -183,8 +184,8 @@ export default function FundTransferList() {
     filters.search,
     filters.sort_by,
     filters.sort_order,
-    isApprover,
-    isPendingTab,
+    hasCheckerRole,
+    isQueueTab,
   ]);
 
   useEffect(() => {
@@ -286,7 +287,7 @@ export default function FundTransferList() {
         key: 'status',
         align: 'center',
         render: (_, row) => {
-          const label = row.status ?? EMPTY_VALUE;
+          const label = getTransferStatusDisplayLabel(row) || EMPTY_VALUE;
           return (
             <Tag color={getTransferStatusTagColor(row)} className="!m-0 px-2.5 py-0.5 text-xs font-medium">
               {label}
@@ -314,7 +315,7 @@ export default function FundTransferList() {
           <button
             type="button"
             onClick={() => openTransferDetail(row)}
-            className="inline-flex items-center space-x-1 rounded-lg px-3 py-1.5 text-sm text-white"
+            className="inline-flex items-center rounded-lg px-3 py-1.5 text-sm text-white"
             style={{ backgroundColor: BRAND }}
             onMouseEnter={(e) => {
               e.currentTarget.style.backgroundColor = BRAND_DARK;
@@ -323,13 +324,12 @@ export default function FundTransferList() {
               e.currentTarget.style.backgroundColor = BRAND;
             }}
           >
-            <Eye size={16} className="text-white" />
-            <span>{isPendingTab && isApprover ? 'Review' : 'View'}</span>
+            {isQueueTab ? getFundTransferQueueActionLabel(selectedRole) : 'View'}
           </button>
         ),
       },
     ],
-    [filters.per_page, isApprover, isPendingTab, openTransferDetail, pagination]
+    [filters.per_page, isQueueTab, openTransferDetail, pagination, selectedRole]
   );
 
   const statusTabItems = useMemo(
@@ -337,7 +337,7 @@ export default function FundTransferList() {
       FUND_TRANSFER_STATUS_TABS.map((tab) => ({
         key: tab.key,
         label:
-          tab.showPendingBadge && isApprover ? (
+          tab.showPendingBadge && tab.queueRole === String(selectedRole || '').trim().toLowerCase() ? (
             <span className="inline-flex items-center gap-2">
               {tab.label}
               <Badge
@@ -351,22 +351,10 @@ export default function FundTransferList() {
             tab.label
           ),
       })),
-    [isApprover, pendingCount]
+    [pendingCount, selectedRole]
   );
 
-  const tableToolbar = (
-    <div className="flex flex-wrap items-center gap-4">
-      <button
-        type="button"
-        onClick={() => {
-          fetchTransfers();
-          fetchPendingCount();
-        }}
-        className="btn-secondary flex items-center px-3 py-2 disabled:cursor-not-allowed disabled:opacity-50"
-        disabled={loading}
-      >
-        Refresh
-      </button>
+  const tableToolbar = canInitiate ? (
       <button
         type="button"
         onClick={() => setCreateModalOpen(true)}
@@ -379,10 +367,9 @@ export default function FundTransferList() {
           e.currentTarget.style.backgroundColor = BRAND;
         }}
       >
-        Initiate
+        Update
       </button>
-    </div>
-  );
+  ) : null;
 
   return (
     <div className="space-y-4">
@@ -392,6 +379,13 @@ export default function FundTransferList() {
         items={statusTabItems}
         tabBarStyle={{ marginBottom: 0 }}
       />
+
+      {error ? (
+        <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <AlertCircle size={16} className="shrink-0" />
+          <span>{error}</span>
+        </div>
+      ) : null}
 
       <div className="relative">
         {loading ? (

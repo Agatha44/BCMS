@@ -15,15 +15,99 @@ use Illuminate\Validation\ValidationException;
 
 class AccountTransferWorkflowService
 {
-    private const APPROVER_ROLE = 'Toll Supervisor';
+    private const ROLE_REGISTRAR = 'Toll Registrar';
+
+    private const ROLE_SUPERVISOR = 'Toll Supervisor';
+
+    private const ROLE_ACCOUNTANT = 'Toll Accountant';
+
+    private const ROLE_APPROVER = 'Toll Approver';
 
     public function __construct(
         private AccountTransferDocumentService $documentService
     ) {}
 
+    public function isInitiator(?int $userId = null): bool
+    {
+        return $this->hasBridgeEmployeeRole(self::ROLE_REGISTRAR, $userId);
+    }
+
+    public function isSupervisor(?int $userId = null): bool
+    {
+        return $this->hasBridgeEmployeeRole(self::ROLE_SUPERVISOR, $userId);
+    }
+
+    public function isAccountant(?int $userId = null): bool
+    {
+        return $this->hasBridgeEmployeeRole(self::ROLE_ACCOUNTANT, $userId);
+    }
+
     public function isApprover(?int $userId = null): bool
     {
-        return $this->hasBridgeEmployeeRole(self::APPROVER_ROLE, $userId);
+        return $this->hasBridgeEmployeeRole(self::ROLE_APPROVER, $userId);
+    }
+
+    public function isChecker(?int $userId = null): bool
+    {
+        return $this->isSupervisor($userId) || $this->isAccountant($userId) || $this->isApprover($userId);
+    }
+
+    public function isWorkflowParticipant(?int $userId = null): bool
+    {
+        return $this->isInitiator($userId) || $this->isChecker($userId);
+    }
+
+    /**
+     * Statuses the user may act on, optionally scoped to the selected role.
+     *
+     * @return string[]
+     */
+    public function queueStatusesForUser(?string $selectedRole = null, ?int $userId = null): array
+    {
+        $role = strtolower(trim((string) $selectedRole));
+        $map = [
+            'toll supervisor' => AccountTransferStatus::PENDING,
+            'toll accountant' => AccountTransferStatus::REVIEWED,
+            'toll approver' => AccountTransferStatus::VERIFIED,
+        ];
+
+        if ($role !== '' && isset($map[$role])) {
+            $hasRole = match ($role) {
+                'toll supervisor' => $this->isSupervisor($userId),
+                'toll accountant' => $this->isAccountant($userId),
+                'toll approver' => $this->isApprover($userId),
+                default => false,
+            };
+
+            return $hasRole ? [$map[$role]] : [];
+        }
+
+        $statuses = [];
+        if ($this->isSupervisor($userId)) {
+            $statuses[] = AccountTransferStatus::PENDING;
+        }
+        if ($this->isAccountant($userId)) {
+            $statuses[] = AccountTransferStatus::REVIEWED;
+        }
+        if ($this->isApprover($userId)) {
+            $statuses[] = AccountTransferStatus::VERIFIED;
+        }
+
+        return $statuses;
+    }
+
+    public function canActOnTransfer(AccountTransfer $transfer, int $userId): bool
+    {
+        if ((int) $transfer->created_by === $userId) {
+            return false;
+        }
+
+        return match ($transfer->status) {
+            AccountTransferStatus::PENDING => $this->isSupervisor($userId),
+            AccountTransferStatus::REVIEWED => $this->isAccountant($userId),
+            AccountTransferStatus::VERIFIED => $this->isApprover($userId),
+            default => false,
+        };
     }
 
     private function hasBridgeEmployeeRole(string $roleName, ?int $userId = null): bool
@@ -71,6 +155,14 @@ class AccountTransferWorkflowService
      */
     public function submit(array $input, UploadedFile $file, int $userId): array
     {
+        if (!$this->isInitiator($userId)) {
+            return [
+                'success' => false,
+                'error' => 'Only a Toll Registrar can initiate fund transfers.',
+                'http' => 403,
+            ];
+        }
+
         $fromAccountNo = $this->normalizeAccountReference($input['from_account_id'] ?? null);
         $toAccountNo = $this->normalizeAccountReference($input['to_account_id'] ?? null);
         $amount = (float) $input['amount'];
@@ -158,7 +250,7 @@ class AccountTransferWorkflowService
                 'updated_by' => $userId,
             ]);
 
-            Log::info('Account transfer submitted for approval', [
+            Log::info('Account transfer initiated for review', [
                 'transfer_id' => $transfer->id,
                 'transfer_uuid' => $transferUuid,
                 'created_by' => $userId,
@@ -167,7 +259,7 @@ class AccountTransferWorkflowService
             return [
                 'success' => true,
                 'data' => $this->buildTransferResponse($transfer),
-                'message' => 'Account transfer submitted for approval',
+                'message' => 'Account transfer initiated. Awaiting Toll Supervisor review.',
                 'http' => 201,
             ];
         } catch (\Throwable $e) {
@@ -201,6 +293,10 @@ class AccountTransferWorkflowService
 
         if ((int) $transfer->created_by !== $userId) {
             return ['success' => false, 'error' => 'Only the original submitter can resubmit this transfer', 'http' => 403];
+        }
+
+        if (!$this->isInitiator($userId)) {
+            return ['success' => false, 'error' => 'Only a Toll Registrar can resubmit fund transfers.', 'http' => 403];
         }
 
         $fromAccountNo = $this->normalizeAccountReference($transfer->from_account_id);
@@ -246,6 +342,15 @@ class AccountTransferWorkflowService
         $transfer->action = $action;
         $transfer->request_date = $requestDate;
         $transfer->status = AccountTransferStatus::PENDING;
+        $transfer->reviewed_by = null;
+        $transfer->reviewed_at = null;
+        $transfer->review_comment = null;
+        $transfer->verified_by = null;
+        $transfer->verified_at = null;
+        $transfer->verification_comment = null;
+        $transfer->approved_by = null;
+        $transfer->approved_at = null;
+        $transfer->approval_comment = null;
         $transfer->returned_by = null;
         $transfer->returned_at = null;
         $transfer->return_comment = null;
@@ -262,7 +367,7 @@ class AccountTransferWorkflowService
         return [
             'success' => true,
             'data' => $this->buildTransferResponse($transfer->fresh()),
-            'message' => 'Account transfer resubmitted for approval',
+            'message' => 'Account transfer resubmitted for review',
             'http' => 200,
         ];
     }
@@ -270,12 +375,12 @@ class AccountTransferWorkflowService
     /**
      * @return array{success: bool, data?: array, message?: string, error?: string, http?: int}
      */
-    public function approve(int $transferId, string $comment, int $userId): array
+    public function review(int $transferId, string $comment, int $userId): array
     {
-        if (!$this->isApprover($userId)) {
+        if (!$this->isSupervisor($userId)) {
             return [
                 'success' => false,
-                'error' => 'You do not have permission to approve account transfers.',
+                'error' => 'Only a Toll Supervisor can review fund transfers.',
                 'http' => 403,
             ];
         }
@@ -288,7 +393,129 @@ class AccountTransferWorkflowService
                 }
 
                 if (!$transfer->isPending()) {
-                    return ['success' => false, 'error' => 'Only pending transfers can be approved', 'http' => 409];
+                    return ['success' => false, 'error' => 'Only initiated transfers can be reviewed', 'http' => 409];
+                }
+
+                if ((int) $transfer->created_by === $userId) {
+                    return ['success' => false, 'error' => 'You cannot review your own transfer request', 'http' => 403];
+                }
+
+                $transfer->status = AccountTransferStatus::REVIEWED;
+                $transfer->reviewed_by = $userId;
+                $transfer->reviewed_at = now();
+                $transfer->review_comment = $comment;
+                $transfer->updated_by = $userId;
+                $transfer->save();
+
+                Log::info('Account transfer reviewed', [
+                    'transfer_id' => $transfer->id,
+                    'reviewed_by' => $userId,
+                ]);
+
+                return [
+                    'success' => true,
+                    'data' => $this->buildTransferResponse($transfer->fresh()),
+                    'message' => 'Account transfer reviewed. Awaiting Toll Accountant verification.',
+                    'http' => 200,
+                ];
+            });
+        } catch (\Throwable $e) {
+            Log::error('Account transfer review failed', [
+                'transfer_id' => $transferId,
+                'message' => $e->getMessage(),
+            ]);
+
+            return [
+                'success' => false,
+                'error' => 'Failed to review transfer: ' . $e->getMessage(),
+                'http' => 500,
+            ];
+        }
+    }
+
+    /**
+     * @return array{success: bool, data?: array, message?: string, error?: string, http?: int}
+     */
+    public function verify(int $transferId, string $comment, int $userId): array
+    {
+        if (!$this->isAccountant($userId)) {
+            return [
+                'success' => false,
+                'error' => 'Only a Toll Accountant can verify fund transfers.',
+                'http' => 403,
+            ];
+        }
+
+        try {
+            return DB::transaction(function () use ($transferId, $comment, $userId) {
+                $transfer = AccountTransfer::query()->lockForUpdate()->find($transferId);
+                if (!$transfer) {
+                    return ['success' => false, 'error' => 'Transfer not found', 'http' => 404];
+                }
+
+                if (!$transfer->isReviewed()) {
+                    return ['success' => false, 'error' => 'Only reviewed transfers can be verified', 'http' => 409];
+                }
+
+                if ((int) $transfer->created_by === $userId) {
+                    return ['success' => false, 'error' => 'You cannot verify your own transfer request', 'http' => 403];
+                }
+
+                $transfer->status = AccountTransferStatus::VERIFIED;
+                $transfer->verified_by = $userId;
+                $transfer->verified_at = now();
+                $transfer->verification_comment = $comment;
+                $transfer->updated_by = $userId;
+                $transfer->save();
+
+                Log::info('Account transfer verified', [
+                    'transfer_id' => $transfer->id,
+                    'verified_by' => $userId,
+                ]);
+
+                return [
+                    'success' => true,
+                    'data' => $this->buildTransferResponse($transfer->fresh()),
+                    'message' => 'Account transfer verified. Awaiting Toll Approver approval.',
+                    'http' => 200,
+                ];
+            });
+        } catch (\Throwable $e) {
+            Log::error('Account transfer verification failed', [
+                'transfer_id' => $transferId,
+                'message' => $e->getMessage(),
+            ]);
+
+            return [
+                'success' => false,
+                'error' => 'Failed to verify transfer: ' . $e->getMessage(),
+                'http' => 500,
+            ];
+        }
+    }
+
+    /**
+     * @return array{success: bool, data?: array, message?: string, error?: string, http?: int}
+     */
+    public function approve(int $transferId, string $comment, int $userId): array
+    {
+        if (!$this->isApprover($userId)) {
+            return [
+                'success' => false,
+                'error' => 'Only a Toll Approver can approve fund transfers.',
+                'http' => 403,
+            ];
+        }
+
+        try {
+            return DB::transaction(function () use ($transferId, $comment, $userId) {
+                $transfer = AccountTransfer::query()->lockForUpdate()->find($transferId);
+                if (!$transfer) {
+                    return ['success' => false, 'error' => 'Transfer not found', 'http' => 404];
+                }
+
+                if (!$transfer->isVerified()) {
+                    return ['success' => false, 'error' => 'Only verified transfers can be approved', 'http' => 409];
                 }
 
                 if ((int) $transfer->created_by === $userId) {
@@ -532,7 +759,7 @@ class AccountTransferWorkflowService
         callable $applyFields,
         string $successMessage
     ): array {
-        if (!$this->isApprover($userId)) {
+        if (!$this->isChecker($userId)) {
             return [
                 'success' => false,
                 'error' => "You do not have permission to {$actionLabel} account transfers.",
@@ -547,12 +774,20 @@ class AccountTransferWorkflowService
                     return ['success' => false, 'error' => 'Transfer not found', 'http' => 404];
                 }
 
-                if (!$transfer->isPending()) {
-                    return ['success' => false, 'error' => "Only pending transfers can be {$actionLabel}ed", 'http' => 409];
+                if (!$transfer->isInProgress()) {
+                    return ['success' => false, 'error' => "This transfer cannot be {$actionLabel}ed at its current stage", 'http' => 409];
                 }
 
                 if ((int) $transfer->created_by === $userId) {
                     return ['success' => false, 'error' => "You cannot {$actionLabel} your own transfer request", 'http' => 403];
+                }
+
+                if (!$this->canActOnTransfer($transfer, $userId)) {
+                    return [
+                        'success' => false,
+                        'error' => "You cannot {$actionLabel} this transfer at its current stage",
+                        'http' => 403,
+                    ];
                 }
 
                 $transfer->status = $newStatus;

@@ -25,6 +25,12 @@ class AccountTransfer extends Model
         'approval_document_path',
         'approval_document_name',
         'approval_document_mime',
+        'reviewed_by',
+        'reviewed_at',
+        'review_comment',
+        'verified_by',
+        'verified_at',
+        'verification_comment',
         'approved_by',
         'approved_at',
         'approval_comment',
@@ -42,6 +48,8 @@ class AccountTransfer extends Model
         'amount' => 'decimal:2',
         'posted_at' => 'datetime',
         'request_date' => 'date',
+        'reviewed_at' => 'datetime',
+        'verified_at' => 'datetime',
         'approved_at' => 'datetime',
         'rejected_at' => 'datetime',
         'returned_at' => 'datetime',
@@ -54,6 +62,16 @@ class AccountTransfer extends Model
         return $this->belongsTo(AuthUser::class, 'created_by', 'id');
     }
 
+    public function reviewer(): BelongsTo
+    {
+        return $this->belongsTo(AuthUser::class, 'reviewed_by', 'id');
+    }
+
+    public function verifier(): BelongsTo
+    {
+        return $this->belongsTo(AuthUser::class, 'verified_by', 'id');
+    }
+
     public function approver(): BelongsTo
     {
         return $this->belongsTo(AuthUser::class, 'approved_by', 'id');
@@ -64,9 +82,24 @@ class AccountTransfer extends Model
         return $this->status === AccountTransferStatus::PENDING;
     }
 
+    public function isReviewed(): bool
+    {
+        return $this->status === AccountTransferStatus::REVIEWED;
+    }
+
+    public function isVerified(): bool
+    {
+        return $this->status === AccountTransferStatus::VERIFIED;
+    }
+
     public function isReturned(): bool
     {
         return $this->status === AccountTransferStatus::RETURNED;
+    }
+
+    public function isInProgress(): bool
+    {
+        return AccountTransferStatus::isInProgress((string) $this->status);
     }
 
     public function isPosted(): bool

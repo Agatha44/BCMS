@@ -27,6 +27,7 @@ import {
   ArrowRightLeft,
   Receipt,
   Scale,
+  ClipboardList,
 } from 'lucide-react';
 
 /**
@@ -118,7 +119,7 @@ const SOD_NAV_ITEMS = [
   },
   {
     id: 'sod-reconciliation-management',
-    label: 'Manage Update-receipts',
+    label: 'Update Pre-receipts',
     icon: <Scale size={20} />,
     path: '/collection-management/reconciliation-management',
     roles: [
@@ -182,7 +183,7 @@ export const navigationItems = [
     label: 'Dashboard',
     icon: <LayoutDashboard size={20} />,
     path: null, // Path is set dynamically in MainSidebar based on selectedModule
-    roles: ['Employee', 'Employee Approver', 'Employee Registrar', 'Overtime Applicant', 'Overtime Validator', 'Overtime Reviewer', 'Overtime Accountant', 'Toll Registrar', 'Toll Collector', 'Toll Supervisor', 'Toll Approver', 'Toll Reviewer', 'Toll Auditor', 'Toll Administrator', 'Toll Accountant', 'Payroll Initiator', 'Payroll Examiner', 'Payroll Verifier', 'Payroll Approver']
+    roles: ['Employee', 'Employee Administrator', 'Employee Approver', 'Employee Registrar', 'Overtime Applicant', 'Overtime Validator', 'Overtime Reviewer', 'Overtime Accountant', 'Toll Registrar', 'Toll Collector', 'Toll Supervisor', 'Toll Approver', 'Toll Reviewer', 'Toll Auditor', 'Toll Administrator', 'Toll Accountant', 'Payroll Initiator', 'Payroll Examiner', 'Payroll Verifier', 'Payroll Approver']
   },
   {
     id: 'manage-users',
@@ -307,11 +308,25 @@ export const navigationItems = [
   },
 
   {
-    id: 'leave-management',
-    label: 'Leave Management',
-    icon: <Calendar size={20} />,
-    path: '/leave-management',
-    roles: ['Employee']
+    id: 'leave-application',
+    label: 'Manage Application',
+    icon: <ClipboardList size={20} />,
+    path: '/leave-management/application',
+    roles: ['Employee', 'Employee Administrator', 'Employee Approver']
+  },
+  {
+    id: 'leave-balance',
+    label: 'Manage Balance',
+    icon: <Scale size={20} />,
+    path: '/leave-management/balance',
+    roles: ['Employee', 'Employee Administrator', 'Employee Approver']
+  },
+  {
+    id: 'leave-reports',
+    label: 'Manage Reports',
+    icon: <BarChart3 size={20} />,
+    path: '/leave-management/reports',
+    roles: ['Employee', 'Employee Administrator', 'Employee Approver']
   },
   {
     id: 'payroll-runs',

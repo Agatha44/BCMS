@@ -12,7 +12,7 @@ export default function FundTransferApprovalDocumentTab({ transferId, transfer, 
   const [docState, setDocState] = useState({ loading: false, url: null });
 
   const hasDocument = Boolean(transfer?.has_approval_document);
-  const label = transfer?.approval_document_name || 'Approval Document';
+  const label = transfer?.approval_document_name || 'Supporting Document';
 
   useEffect(() => {
     if (!active || !hasDocument || transferId == null) {
@@ -40,7 +40,7 @@ export default function FundTransferApprovalDocumentTab({ transferId, transfer, 
       } catch (error) {
         if (cancelled) return;
         setDocState({ loading: false, url: null });
-        message.error(error?.message || 'Failed to load approval document.');
+        message.error(error?.message || 'Failed to load supporting document.');
       }
     })();
 
@@ -64,9 +64,12 @@ export default function FundTransferApprovalDocumentTab({ transferId, transfer, 
 
   if (!hasDocument) {
     return (
+      
       <p className="rounded-lg border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center text-sm text-slate-500">
-        No approval document attached.
+         No supporting document attached.
       </p>
+      
+      
     );
   }
 
