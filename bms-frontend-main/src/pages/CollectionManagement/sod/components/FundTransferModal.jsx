@@ -420,8 +420,8 @@ export default function FundTransferModal({
             { responseData: res, validationErrors: res?.data },
             res?.message ||
               (isResubmit
-                ? 'Could not resubmit fund transfer for review.'
-                : 'Could not initiate fund transfer.')
+                ? 'Could not resubmit Update Receipt for review.'
+                : 'Could not initiate Update Receipt.')
           ),
         });
         return;
@@ -433,8 +433,8 @@ export default function FundTransferModal({
         text:
           res.message ||
           (isResubmit
-            ? 'Fund transfer request resubmitted for Toll Supervisor review.'
-            : 'Fund transfer request initiated. Awaiting Toll Supervisor review.'),
+            ? 'Update Receipt resubmitted for Toll Supervisor review.'
+            : 'Update Receipt initiated. Awaiting Toll Supervisor review.'),
         timer: 2500,
         showConfirmButton: false,
       });

@@ -367,7 +367,7 @@ export default function FundTransferDetailsModal({
       await Swal.fire({
         icon: 'success',
         title: actionMeta.successTitle,
-        text: res.message || `Fund transfer ${actionMeta.successText} successfully.`,
+        text: res.message || `Update Receipt ${actionMeta.successText} successfully.`,
         timer: 2200,
         showConfirmButton: false,
       });
@@ -658,7 +658,7 @@ export default function FundTransferDetailsModal({
       className="brand-modal"
       styles={{ body: { padding: 0 }, content: { padding: 0, overflow: 'hidden' } }}
     >
-      <BrandModalHeader title="Fund Transfer Details" onClose={approvalLoading ? undefined : onClose} />
+      <BrandModalHeader title="Update Receipt Details" onClose={approvalLoading ? undefined : onClose} />
 
       <style>{`
         .fund-transfer-detail-tabs .ant-tabs-tab-active .ant-tabs-tab-btn {

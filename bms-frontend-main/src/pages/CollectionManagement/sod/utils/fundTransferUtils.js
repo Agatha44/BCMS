@@ -15,7 +15,7 @@ export {
 } from './fundTransferStatus.js';
 
 export const FUND_TRANSFER_REQUEST_TYPE_OPTIONS = [
-  { value: 'fund_transfer', label: 'Fund Transfer' },
+  { value: 'fund_transfer', label: 'Update Receipt' },
 ];
 
 export const FUND_TRANSFER_ACTION_OPTIONS = [
