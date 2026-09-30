@@ -158,7 +158,7 @@ class AccountTransferWorkflowService
         if (!$this->isInitiator($userId)) {
             return [
                 'success' => false,
-                'error' => 'Only a Toll Registrar can initiate Update Receipts.',
+                'error' => 'Only a Toll Registrar can initiate Update Pre-receipts.',
                 'http' => 403,
             ];
         }
@@ -259,7 +259,7 @@ class AccountTransferWorkflowService
             return [
                 'success' => true,
                 'data' => $this->buildTransferResponse($transfer),
-                'message' => 'Update Receipt initiated. Awaiting Toll Supervisor review.',
+                'message' => 'Update Pre-receipt initiated. Awaiting Toll Supervisor review.',
                 'http' => 201,
             ];
         } catch (\Throwable $e) {
@@ -296,7 +296,7 @@ class AccountTransferWorkflowService
         }
 
         if (!$this->isInitiator($userId)) {
-            return ['success' => false, 'error' => 'Only a Toll Registrar can resubmit Update Receipts.', 'http' => 403];
+            return ['success' => false, 'error' => 'Only a Toll Registrar can resubmit Update Pre-receipts.', 'http' => 403];
         }
 
         $fromAccountNo = $this->normalizeAccountReference($transfer->from_account_id);
@@ -367,7 +367,7 @@ class AccountTransferWorkflowService
         return [
             'success' => true,
             'data' => $this->buildTransferResponse($transfer->fresh()),
-            'message' => 'Update Receipt resubmitted for review',
+            'message' => 'Update Pre-receipt resubmitted for review',
             'http' => 200,
         ];
     }
@@ -380,7 +380,7 @@ class AccountTransferWorkflowService
         if (!$this->isSupervisor($userId)) {
             return [
                 'success' => false,
-                'error' => 'Only a Toll Supervisor can review Update Receipts.',
+                'error' => 'Only a Toll Supervisor can review Update Pre-receipts.',
                 'http' => 403,
             ];
         }
@@ -415,7 +415,7 @@ class AccountTransferWorkflowService
                 return [
                     'success' => true,
                     'data' => $this->buildTransferResponse($transfer->fresh()),
-                    'message' => 'Update Receipt reviewed. Awaiting Toll Accountant verification.',
+                    'message' => 'Update Pre-receipt reviewed. Awaiting Toll Accountant verification.',
                     'http' => 200,
                 ];
             });
@@ -441,7 +441,7 @@ class AccountTransferWorkflowService
         if (!$this->isAccountant($userId)) {
             return [
                 'success' => false,
-                'error' => 'Only a Toll Accountant can verify Update Receipts.',
+                'error' => 'Only a Toll Accountant can verify Update Pre-receipts.',
                 'http' => 403,
             ];
         }
@@ -476,7 +476,7 @@ class AccountTransferWorkflowService
                 return [
                     'success' => true,
                     'data' => $this->buildTransferResponse($transfer->fresh()),
-                    'message' => 'Update Receipt verified. Awaiting Toll Approver approval.',
+                    'message' => 'Update Pre-receipt verified. Awaiting Toll Approver approval.',
                     'http' => 200,
                 ];
             });
@@ -502,7 +502,7 @@ class AccountTransferWorkflowService
         if (!$this->isApprover($userId)) {
             return [
                 'success' => false,
-                'error' => 'Only a Toll Approver can approve Update Receipts.',
+                'error' => 'Only a Toll Approver can approve Update Pre-receipts.',
                 'http' => 403,
             ];
         }
@@ -548,7 +548,7 @@ class AccountTransferWorkflowService
                 return [
                     'success' => true,
                     'data' => array_merge($this->buildTransferResponse($transfer->fresh()), $posted),
-                    'message' => 'Update Receipt approved and posted successfully',
+                    'message' => 'Update Pre-receipt approved and posted successfully',
                     'http' => 200,
                 ];
             });
@@ -589,7 +589,7 @@ class AccountTransferWorkflowService
                 $transfer->rejected_at = now();
                 $transfer->rejection_reason = $comment;
             },
-            'Update Receipt rejected successfully'
+            'Update Pre-receipt rejected successfully'
         );
     }
 
@@ -609,7 +609,7 @@ class AccountTransferWorkflowService
                 $transfer->returned_at = now();
                 $transfer->return_comment = $comment;
             },
-            'Update Receipt returned to submitter successfully'
+            'Update Pre-receipt returned to submitter successfully'
         );
     }
 

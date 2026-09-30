@@ -16,6 +16,7 @@ import {
   ReceiptPercentIcon,
   ExclamationTriangleIcon,
   KeyIcon,
+  LifebuoyIcon,
 } from '@heroicons/react/24/outline';
 import '../../styles/home-dashboard.css';
 
@@ -27,6 +28,8 @@ const iconMap = {
   ReceiptPercentIcon,
   ExclamationTriangleIcon,
   KeyIcon,
+  LifebuoyIcon,
+  support: LifebuoyIcon,
 };
 
 const ModuleCard = ({ icon, iconUrl, title, description, onCardClick, hasAccess }) => {

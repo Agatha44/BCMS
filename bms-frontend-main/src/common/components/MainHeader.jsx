@@ -24,6 +24,7 @@ const getModuleDisplayName = (moduleKey) => {
     'administration-management': 'Administration Management',
     'incident-management': 'Report Incident',
     'notification-management': 'Notification Management',
+    'support-management': 'Support Management',
   };
   return moduleNameMap[moduleKey] || '';
 };

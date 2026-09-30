@@ -11,6 +11,7 @@ import {
   SafetyOutlined,
   ExclamationCircleOutlined,
   PlusOutlined,
+  CustomerServiceOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
@@ -264,6 +265,8 @@ const Dashboard = () => {
         break;
       case 'incident-management':
         await fetchIncidentManagementData();
+        break;
+      case 'support-management':
         break;
       default:
         // Reset stats for unknown modules
@@ -584,6 +587,7 @@ const Dashboard = () => {
       'account-management': 'Account Management',
       'administration-management': 'Administration Management',
       'incident-management': 'Report Incident',
+      'support-management': 'Support Management',
     };
     return moduleTitles[selectedModule] || 'Dashboard';
   };
@@ -598,6 +602,7 @@ const Dashboard = () => {
       'account-management': 'Manage user access, permissions and security controls',
       'administration-management': 'Configure reports, system settings, and administration tools',
       'incident-management': 'View reported incidents and track their resolution',
+      'support-management': 'Assist users and provide system and technical support',
     };
     return moduleDescriptions[selectedModule] || 'View your personalized statistics and information';
   };
@@ -687,6 +692,27 @@ const Dashboard = () => {
         <IncidentManagementDashboard
           stats={stats}
           onReportIncident={() => message.info('Create incident feature coming soon')}
+        />
+      )}
+
+      {selectedModule === 'support-management' && (
+        <PlaceholderModuleDashboard
+          icon={<CustomerServiceOutlined className="dashboard-icon-large" />}
+          title="Support Management Dashboard"
+          description="Assist users and provide system and technical support"
+          actions={
+            <>
+              <Button type="primary" className="btn-standard-primary" onClick={() => navigate('/support-management/requests')}>
+                Manage Requests
+              </Button>
+              <Button type="primary" className="btn-standard-primary" onClick={() => navigate('/support-management/assigned-requests')}>
+                Assign Requests
+              </Button>
+              <Button type="primary" className="btn-standard-primary" onClick={() => navigate('/support-management/report-requests')}>
+                Report Requests
+              </Button>
+            </>
+          }
         />
       )}
 

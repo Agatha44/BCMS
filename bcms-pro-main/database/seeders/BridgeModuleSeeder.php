@@ -126,6 +126,18 @@ class BridgeModuleSeeder extends Seeder
                         'modified_by' => null,
                         'modified_at' => null,
                     ],
+                    [
+                        'id' => 11,
+                        'icon' => 'LifebuoyIcon',
+                        'title' => 'Support Management',
+                        'description' => 'Assists and provides system and technical support',
+                        'module_id' => 'support-management',
+                        'is_active' => true,
+                        'created_by' => 1,
+                        'created_at' => '2026-07-08 00:00:00',
+                        'modified_by' => null,
+                        'modified_at' => null,
+                    ],
                 ],
                 ['id'],
                 [

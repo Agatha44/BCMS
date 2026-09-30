@@ -238,6 +238,16 @@ class RoleSeeder extends Seeder
                         'modified_by' => 1,
                         'modified_at' => '2026-07-01 00:40:37',
                     ],
+                    [
+                        'id' => 27,
+                        'role_name' => 'Support Administrator',
+                        'role_description' => 'Assists and provides system and technical support',
+                        'is_active' => true,
+                        'created_by' => 1,
+                        'created_at' => '2026-07-01 00:40:37',
+                        'modified_by' => 1,
+                        'modified_at' => '2026-07-01 00:40:37',
+                    ],
                 ],
                 ['id'],
                 [

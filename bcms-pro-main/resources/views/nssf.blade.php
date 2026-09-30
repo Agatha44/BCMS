@@ -189,8 +189,13 @@
     </div>
 
     <div class="qr-section">
+        @php
+            $qrPayload = trim(config('app.url') . '/verify-receipt/' . $receipt->receipt_number);
+            $qrSvg = QrCode::size(100)->generate($qrPayload);
+            $qrSvg = preg_replace('/^<\?xml[^?]*\?>\s*/i', '', $qrSvg);
+        @endphp
         <div class="qr-code">
-            {!! str_replace('<?xml version="1.0" encoding="UTF-8"?>', '', QrCode::size(100)->generate(trim(config('app.url') . '/verify-receipt/' . $receipt->receipt_number))) !!}
+            {!! $qrSvg !!}
         </div>
         <div class="verification-text">
             Scan to verify receipt authenticity

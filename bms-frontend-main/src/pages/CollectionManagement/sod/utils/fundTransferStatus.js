@@ -44,7 +44,7 @@ export const FUND_TRANSFER_STATUS_TABS = Object.freeze([
     queueRole: 'toll approver',
     showPendingBadge: true,
   },
-  { key: FUND_TRANSFER_STATUS.REJECTED, label: 'Approval', apiStatus: FUND_TRANSFER_STATUS.REJECTED },
+  { key: FUND_TRANSFER_STATUS.REJECTED, label: 'Rejected', apiStatus: FUND_TRANSFER_STATUS.REJECTED },
 ]);
 
 /** @deprecated Use FUND_TRANSFER_STATUS_TABS — kept for select/options compatibility */
@@ -62,9 +62,9 @@ const STATUS_DISPLAY_LABELS = Object.freeze({
   [FUND_TRANSFER_STATUS.PENDING]: 'Initiated',
   [FUND_TRANSFER_STATUS.REVIEWED]: 'Reviewed',
   [FUND_TRANSFER_STATUS.VERIFIED]: 'Verified',
-  [FUND_TRANSFER_STATUS.POSTED]: 'Verify',
-  [FUND_TRANSFER_STATUS.REJECTED]: 'Approved',
-  [FUND_TRANSFER_STATUS.RETURNED]: 'Permit',
+  [FUND_TRANSFER_STATUS.POSTED]: 'Approved',
+  [FUND_TRANSFER_STATUS.REJECTED]: 'Rejected',
+  [FUND_TRANSFER_STATUS.RETURNED]: 'Returned',
 });
 
 const normalizeStatusText = (value) =>

@@ -5,7 +5,6 @@ const VehicleDetailsRouteRedirect = () => {
   return <Navigate to={`/collection-management/vehicles?open=${id}`} replace />;
 };
 import Layout from "../common/layouts/MainLayout.jsx";
-import SupportPage from "../modules/support/index.jsx";
 import LandingPage from '../common/layouts/LandingPage.jsx';
 import { LoginPage, ForgotPasswordPage, ChangePasswordPage } from '../modules/auth/index.jsx';
 import Dashboard from '../pages/Dashboard/Dashboard.jsx';
@@ -68,6 +67,9 @@ import ReconciliationManagementPage from '../pages/CollectionManagement/sod/Reco
 import LeaveApplication from '../pages/LeaveManagement/LeaveApplication.jsx';
 import LeaveBalance from '../pages/LeaveManagement/LeaveBalance.jsx';
 import LeaveReports from '../pages/LeaveManagement/LeaveReports.jsx';
+import ManageRequests from '../pages/SupportManagement/ManageRequests.jsx';
+import AssignedRequests from '../pages/SupportManagement/AssignedRequests.jsx';
+import RequestReports from '../pages/SupportManagement/RequestReports.jsx';
 
 export default function AppRoutes() {
     return useRoutes([
@@ -354,14 +356,52 @@ export default function AppRoutes() {
         )
       },
       {
-        path: '/support',
+        path: '/support-management',
+        element: <Navigate to="/support-management/dashboard" replace />,
+      },
+      {
+        path: '/support-management/dashboard',
         element: (
           <ProtectedRoute>
             <Layout>
-              <SupportPage />
+              <Dashboard />
             </Layout>
           </ProtectedRoute>
         )
+      },
+      {
+        path: '/support-management/requests',
+        element: (
+          <ProtectedRoute>
+            <Layout>
+              <ManageRequests />
+            </Layout>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/support-management/assigned-requests',
+        element: (
+          <ProtectedRoute>
+            <Layout>
+              <AssignedRequests />
+            </Layout>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/support-management/report-requests',
+        element: (
+          <ProtectedRoute>
+            <Layout>
+              <RequestReports />
+            </Layout>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/support',
+        element: <Navigate to="/support-management/dashboard" replace />,
       },
       {
         path: '/employee-management/registration',

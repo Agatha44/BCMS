@@ -53,7 +53,9 @@ const getModuleFromRoute = (pathname) => {
     '/payroll-management': 'payroll-management',
     '/incident-management/dashboard': 'incident-management',
     '/incident-management': 'incident-management',
-    '/support': 'support',
+    '/support-management/dashboard': 'support-management',
+    '/support-management': 'support-management',
+    '/support': 'support-management',
   };
 
   // Check exact match first

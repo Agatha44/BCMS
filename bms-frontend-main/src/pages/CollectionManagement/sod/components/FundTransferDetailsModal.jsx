@@ -303,21 +303,14 @@ export default function FundTransferDetailsModal({
     hasFieldValue(transfer?.verification_comment);
 
   const showApprovalSection =
-    hasFieldValue(transfer?.approved_by) ||
-    hasFieldValue(transfer?.approved_at) ||
-    hasFieldValue(transfer?.approval_comment);
+    statusKey === FUND_TRANSFER_STATUS.POSTED &&
+    (hasFieldValue(transfer?.approved_by) ||
+      hasFieldValue(transfer?.approved_at) ||
+      hasFieldValue(transfer?.approval_comment));
 
-  const showRejectionSection =
-    statusKey === FUND_TRANSFER_STATUS.REJECTED ||
-    hasFieldValue(transfer?.rejected_by) ||
-    hasFieldValue(transfer?.rejected_at) ||
-    hasFieldValue(transfer?.rejection_reason);
+  const showRejectionSection = statusKey === FUND_TRANSFER_STATUS.REJECTED;
 
-  const showReturnSection =
-    statusKey === FUND_TRANSFER_STATUS.RETURNED ||
-    hasFieldValue(transfer?.returned_by) ||
-    hasFieldValue(transfer?.returned_at) ||
-    hasFieldValue(transfer?.return_comment);
+  const showReturnSection = statusKey === FUND_TRANSFER_STATUS.RETURNED;
 
   const showClientReference = hasFieldValue(transfer?.client_reference);
 
@@ -367,7 +360,7 @@ export default function FundTransferDetailsModal({
       await Swal.fire({
         icon: 'success',
         title: actionMeta.successTitle,
-        text: res.message || `Update Receipt ${actionMeta.successText} successfully.`,
+        text: res.message || `Update Pre-receipt ${actionMeta.successText} successfully.`,
         timer: 2200,
         showConfirmButton: false,
       });
@@ -658,7 +651,7 @@ export default function FundTransferDetailsModal({
       className="brand-modal"
       styles={{ body: { padding: 0 }, content: { padding: 0, overflow: 'hidden' } }}
     >
-      <BrandModalHeader title="Update Receipt Details" onClose={approvalLoading ? undefined : onClose} />
+      <BrandModalHeader title="Update Pre-receipt Details" onClose={approvalLoading ? undefined : onClose} />
 
       <style>{`
         .fund-transfer-detail-tabs .ant-tabs-tab-active .ant-tabs-tab-btn {

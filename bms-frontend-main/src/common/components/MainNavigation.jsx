@@ -28,6 +28,8 @@ import {
   Receipt,
   Scale,
   ClipboardList,
+  Headset,
+  UserCheck,
 } from 'lucide-react';
 
 /**
@@ -183,7 +185,7 @@ export const navigationItems = [
     label: 'Dashboard',
     icon: <LayoutDashboard size={20} />,
     path: null, // Path is set dynamically in MainSidebar based on selectedModule
-    roles: ['Employee', 'Employee Administrator', 'Employee Approver', 'Employee Registrar', 'Overtime Applicant', 'Overtime Validator', 'Overtime Reviewer', 'Overtime Accountant', 'Toll Registrar', 'Toll Collector', 'Toll Supervisor', 'Toll Approver', 'Toll Reviewer', 'Toll Auditor', 'Toll Administrator', 'Toll Accountant', 'Payroll Initiator', 'Payroll Examiner', 'Payroll Verifier', 'Payroll Approver']
+    roles: ['Employee', 'Employee Administrator', 'Employee Approver', 'Employee Registrar', 'Overtime Applicant', 'Overtime Validator', 'Overtime Reviewer', 'Overtime Accountant', 'Toll Registrar', 'Toll Collector', 'Toll Supervisor', 'Toll Approver', 'Toll Reviewer', 'Toll Auditor', 'Toll Administrator', 'Toll Accountant', 'Payroll Initiator', 'Payroll Examiner', 'Payroll Verifier', 'Payroll Approver', 'Support Administrator']
   },
   {
     id: 'manage-users',
@@ -461,6 +463,27 @@ export const navigationItems = [
     icon: <AlertTriangle size={20} />,
     path: '/incident-management',
     roles: ['Toll Collector', 'Toll Supervisor', 'Toll Reviewer']
+  },
+  {
+    id: 'support-manage-requests',
+    label: 'Manage Requests',
+    icon: <Headset size={20} />,
+    path: '/support-management/requests',
+    roles: ['Support Administrator', 'Toll Supervisor', 'Toll Reviewer']
+  },
+  {
+    id: 'support-assigned-requests',
+    label: 'Assign Requests',
+    icon: <UserCheck size={20} />,
+    path: '/support-management/assigned-requests',
+    roles: ['Support Administrator', 'Toll Supervisor', 'Toll Reviewer']
+  },
+  {
+    id: 'support-report-requests',
+    label: 'Report Requests',
+    icon: <BarChart3 size={20} />,
+    path: '/support-management/report-requests',
+    roles: ['Support Administrator', 'Toll Supervisor', 'Toll Reviewer']
   }
 ];
 

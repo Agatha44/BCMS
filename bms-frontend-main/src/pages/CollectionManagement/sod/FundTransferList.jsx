@@ -169,11 +169,11 @@ export default function FundTransferList() {
       } else {
         setRows([]);
         setPagination((prev) => ({ ...prev, current_page: 1, total: 0, from: 0, to: 0 }));
-        setError(res?.message || 'Failed to load Update Receipts');
+        setError(res?.message || 'Failed to load Update Pre-receipts');
       }
     } catch (err) {
       setRows([]);
-      setError(err?.message || 'An error occurred while fetching Update Receipts');
+      setError(err?.message || 'An error occurred while fetching Update Pre-receipts');
     } finally {
       setLoading(false);
     }

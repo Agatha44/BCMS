@@ -17,7 +17,8 @@ const getModuleDisplayName = (moduleId) => {
         'payroll-management': 'Payroll Management',
         'incident-management': 'Report Incident',
         'notification-management': 'Notification Management',
-        'support': 'Support',
+        'support-management': 'Support Management',
+        'support': 'Support Management',
     };
     return moduleNames[moduleId] || moduleId;
 };
@@ -34,7 +35,8 @@ const getModuleFromPath = (pathname) => {
         '/payroll-management': 'payroll-management',
         '/incident-management': 'incident-management',
         '/notification-management': 'notification-management',
-        '/support': 'support',
+        '/support-management': 'support-management',
+        '/support': 'support-management',
     };
 
     for (const [route, module] of Object.entries(routeModuleMap)) {
