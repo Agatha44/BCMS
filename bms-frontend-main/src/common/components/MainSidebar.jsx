@@ -43,6 +43,8 @@ const HARDCODED_ROLES = [
     'Payroll Verifier',
     'Payroll Approver',
     'Support Administrator',
+    'ICT Officer',
+    'Technical Officer',
 ];
 
 function classNames(...classes) {

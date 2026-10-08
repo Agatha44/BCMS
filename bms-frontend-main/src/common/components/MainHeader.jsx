@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import logo from '../../assets/images/logo.png';
-import { Bars3Icon, BellIcon, UserIcon } from '@heroicons/react/24/outline/index.js';
+import { Bars3Icon, UserIcon } from '@heroicons/react/24/outline/index.js';
 import { BiSupport } from 'react-icons/bi';
 import {
   setOpenSideBarDrawer,
@@ -12,6 +12,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import SupportDeskDrawer from './SupportDeskDrawer.jsx';
 import UserActionCenterDrawer from './UserActionCenterDrawer.jsx';
 import ThemeToggle from './ThemeToggle.jsx';
+import AccountRequestNotificationBell from './AccountRequestNotificationBell.jsx';
 
 const getModuleDisplayName = (moduleKey) => {
   const moduleNameMap = {
@@ -72,10 +73,7 @@ const MainHeader = () => {
             </div>
           </div>
           <div className="flex items-center gap-x-2 lg:gap-x-4">
-            <button type="button" className="-m-2.5 p-2.5 text-gray-400 hover:text-gray-500">
-              <span className="sr-only">View notifications</span>
-              <BellIcon className="h-6 w-6" aria-hidden="true" />
-            </button>
+            <AccountRequestNotificationBell />
 
             <ThemeToggle variant="burgundy" />
 

@@ -42,3 +42,8 @@ export const updateSupportRequest = (id, patch) => {
   persistSupportRequests(next);
   return next;
 };
+
+export const saveSupportRequests = (requests) => {
+  persistSupportRequests(requests);
+  return requests;
+};

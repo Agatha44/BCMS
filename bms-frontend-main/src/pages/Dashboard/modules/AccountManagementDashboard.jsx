@@ -9,6 +9,9 @@ import {
   UserCog,
   UserRound,
   Users,
+  ClipboardList,
+  BarChart3,
+  UserCheck,
 } from 'lucide-react';
 
 const BRAND = '#962E32';
@@ -111,6 +114,9 @@ const AccountManagementDashboard = ({
   onManageModules,
   onGrantRole,
   onRoleModuleMenu,
+  onManageAccountRequests,
+  onManageReports,
+  onReviewRoles,
 }) => {
   const roles = stats?.totalRoles ?? 0;
   const permissions = stats?.totalPermissions ?? 0;
@@ -232,6 +238,24 @@ const AccountManagementDashboard = ({
             description="Collection and BMS users, roles, and account status"
             onClick={onManageUsers}
             active
+          />
+          <ManagementMenuItem
+            icon={ClipboardList}
+            label="Manage Account-requests"
+            description="Submit and review user account and role requests"
+            onClick={onManageAccountRequests}
+          />
+          <ManagementMenuItem
+            icon={BarChart3}
+            label="Manage Reports"
+            description="View account request reports by type, status, and date"
+            onClick={onManageReports}
+          />
+          <ManagementMenuItem
+            icon={UserCheck}
+            label="Review Roles"
+            description="Review requested roles and modules for account requests"
+            onClick={onReviewRoles}
           />
           <ManagementMenuItem
             icon={Users}

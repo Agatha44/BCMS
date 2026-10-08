@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { App, Button, DatePicker, Form, Modal, Select, Tabs, Tag } from 'antd';
 import { EyeOutlined } from '@ant-design/icons';
 import { BarChart3, FileText } from 'lucide-react';
@@ -7,6 +8,8 @@ import isoWeek from 'dayjs/plugin/isoWeek';
 import { DataTable } from '../../common/data/index.jsx';
 import BrandModalHeader from '../CollectionManagement/sod/components/BrandModalHeader.jsx';
 import { listSupportRequests } from './supportRequestStore.js';
+import SupportRequestMinutes from './SupportRequestMinutes.jsx';
+import { getSupportUsername } from './supportRequestMinutes.js';
 import '../../styles/common.css';
 
 dayjs.extend(isoWeek);
@@ -33,6 +36,7 @@ const STATUS_OPTIONS = [
   { label: 'Closed', value: 'Closed' },
   { label: 'Resolved', value: 'Resolved' },
   { label: 'On Hold', value: 'On Hold' },
+  { label: 'Cancelled', value: 'Cancelled' },
 ];
 
 const getStatusTag = (status) => {
@@ -40,6 +44,8 @@ const getStatusTag = (status) => {
   if (normalized === 'resolved') return <Tag color="green">Resolved</Tag>;
   if (normalized === 'assigned') return <Tag color="purple">Assigned</Tag>;
   if (normalized === 'verified') return <Tag color="cyan">Verified</Tag>;
+  if (normalized === 'on hold') return <Tag color="gold">On Hold</Tag>;
+  if (normalized === 'cancelled' || normalized === 'canceled') return <Tag color="red">Cancelled</Tag>;
   if (normalized === 'closed') return <Tag color="default">Closed</Tag>;
   if (normalized === 'reopened') return <Tag color="orange">Reopened</Tag>;
   if (normalized === 'opened') return <Tag color="blue">Opened</Tag>;
@@ -147,6 +153,8 @@ const filterReportRows = (requests, { reportPeriod, periodDate, requestType, sta
 
 const RequestReports = () => {
   const { message } = App.useApp();
+  const currentUser = useSelector((state) => state.auth.user);
+  const selectedRole = useSelector((state) => state.app.selectedRole);
   const [form] = Form.useForm();
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -480,6 +488,14 @@ const RequestReports = () => {
                   )}
                 </div>
               </Section>
+
+              <SupportRequestMinutes
+                minutes={selected.minutes}
+                requestNumber={selected.request_no || selected.id}
+                currentStatus={selected.status}
+                username={getSupportUsername(currentUser)}
+                roleName={selectedRole}
+              />
             </div>
             <div className="flex items-center justify-end border-t border-slate-200 bg-white px-6 py-3">
               <Button onClick={closeView}>Close</Button>

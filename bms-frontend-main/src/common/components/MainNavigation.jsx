@@ -185,7 +185,7 @@ export const navigationItems = [
     label: 'Dashboard',
     icon: <LayoutDashboard size={20} />,
     path: null, // Path is set dynamically in MainSidebar based on selectedModule
-    roles: ['Employee', 'Employee Administrator', 'Employee Approver', 'Employee Registrar', 'Overtime Applicant', 'Overtime Validator', 'Overtime Reviewer', 'Overtime Accountant', 'Toll Registrar', 'Toll Collector', 'Toll Supervisor', 'Toll Approver', 'Toll Reviewer', 'Toll Auditor', 'Toll Administrator', 'Toll Accountant', 'Payroll Initiator', 'Payroll Examiner', 'Payroll Verifier', 'Payroll Approver', 'Support Administrator']
+    roles: ['Employee', 'Employee Administrator', 'Employee Approver', 'Employee Registrar', 'Overtime Applicant', 'Overtime Validator', 'Overtime Reviewer', 'Overtime Accountant', 'Toll Registrar', 'Toll Collector', 'Toll Supervisor', 'Toll Approver', 'Toll Reviewer', 'Toll Auditor', 'Toll Administrator', 'Toll Accountant', 'Payroll Initiator', 'Payroll Examiner', 'Payroll Verifier', 'Payroll Approver', 'Support Administrator', 'ICT Officer', 'Technical Officer']
   },
   {
     id: 'manage-users',
@@ -193,6 +193,27 @@ export const navigationItems = [
     icon: <Users size={16} />,
     path: '/admin-management/manage-users',
     roles: ['Toll Administrator', 'Employee Approver']
+  },
+  {
+    id: 'account-manage-account-requests',
+    label: 'Manage Account-requests',
+    icon: <ClipboardList size={16} />,
+    path: '/admin-management/account-requests',
+    roles: ['Toll Administrator', 'Employee Approver', 'Toll Reviewer', 'Toll Approver']
+  },
+  {
+    id: 'account-manage-reports',
+    label: 'Manage Reports',
+    icon: <BarChart3 size={16} />,
+    path: '/admin-management/account-reports',
+    roles: ['Toll Administrator', 'Employee Approver', 'Toll Reviewer', 'Toll Approver']
+  },
+  {
+    id: 'account-review-roles',
+    label: 'Review Roles',
+    icon: <UserCheck size={16} />,
+    path: '/admin-management/review-roles',
+    roles: ['Toll Administrator', 'Employee Approver', 'Toll Reviewer', 'Toll Approver']
   },
   ...SOD_NAV_ITEMS,
   SOD_LEGACY_DIVIDER,
@@ -469,21 +490,21 @@ export const navigationItems = [
     label: 'Manage Requests',
     icon: <Headset size={20} />,
     path: '/support-management/requests',
-    roles: ['Support Administrator', 'Toll Supervisor', 'Toll Reviewer']
+    roles: ['Support Administrator', 'Toll Supervisor', 'Toll Reviewer', 'Toll Accountant', 'Toll Registrar', 'ICT Officer', 'Technical Officer']
   },
   {
     id: 'support-assigned-requests',
     label: 'Assign Requests',
     icon: <UserCheck size={20} />,
     path: '/support-management/assigned-requests',
-    roles: ['Support Administrator', 'Toll Supervisor', 'Toll Reviewer']
+    roles: ['Support Administrator', 'Toll Supervisor', 'Toll Reviewer', 'ICT Officer', 'Technical Officer']
   },
   {
     id: 'support-report-requests',
     label: 'Report Requests',
     icon: <BarChart3 size={20} />,
     path: '/support-management/report-requests',
-    roles: ['Support Administrator', 'Toll Supervisor', 'Toll Reviewer']
+    roles: ['Support Administrator', 'Toll Supervisor', 'Toll Reviewer', 'ICT Officer', 'Technical Officer']
   }
 ];
 

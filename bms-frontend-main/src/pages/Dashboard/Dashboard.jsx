@@ -677,6 +677,9 @@ const Dashboard = () => {
           onManageModules={() => navigate('/admin-management/manage-modules')}
           onGrantRole={() => navigate('/admin-management/manage-users?tab=bms-users')}
           onRoleModuleMenu={() => navigate('/admin-management/manage-modules?tab=role-module-menu')}
+          onManageAccountRequests={() => navigate('/admin-management/account-requests')}
+          onManageReports={() => navigate('/admin-management/account-reports')}
+          onReviewRoles={() => navigate('/admin-management/review-roles')}
         />
       )}
 

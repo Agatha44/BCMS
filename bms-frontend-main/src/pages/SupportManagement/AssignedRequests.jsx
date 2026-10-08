@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { App, Button, Modal, Tag } from 'antd';
+import { App, Button, Form, Input, Modal, Tag } from 'antd';
 import { EyeOutlined } from '@ant-design/icons';
 import { ChevronRight, FileText, Monitor, UserCheck, Wrench } from 'lucide-react';
 import { DataTable } from '../../common/data/index.jsx';
 import BrandModalHeader from '../CollectionManagement/sod/components/BrandModalHeader.jsx';
-import { listSupportRequests, updateSupportRequest } from './supportRequestStore.js';
+import { listSupportRequests, saveSupportRequests, updateSupportRequest } from './supportRequestStore.js';
+import SupportRequestMinutes from './SupportRequestMinutes.jsx';
+import { appendSupportMinute, ensureSupportMinutes, getSupportUsername } from './supportRequestMinutes.js';
 import '../../styles/common.css';
 
 const BRAND = '#962E32';
@@ -37,14 +39,67 @@ const STATUS_OPTIONS = [
   { label: 'Verified', value: 'Verified' },
   { label: 'Assigned', value: 'Assigned' },
   { label: 'Reopened', value: 'Reopened' },
+  { label: 'On Hold', value: 'On Hold' },
   { label: 'Closed', value: 'Closed' },
   { label: 'Resolved', value: 'Resolved' },
+  { label: 'Cancelled', value: 'Cancelled' },
 ];
+const HOLDABLE_STATUSES = ['opened', 'assigned', 'verified', 'reopened'];
+const CLOSEABLE_STATUSES = ['opened', 'assigned', 'verified', 'reopened', 'on hold'];
+
+const isSystemRequestType = (requestType) =>
+  String(requestType || '').toLowerCase() === SYSTEM_REQUEST_TYPE.toLowerCase();
+
+const isHardwareRequestType = (requestType) =>
+  String(requestType || '').toLowerCase() === INFRASTRUCTURE_REQUEST_TYPE.toLowerCase();
+
+const canImplementRequestType = (roleName, requestType) => {
+  const normalizedRole = String(roleName || '').trim().toLowerCase();
+  if (normalizedRole === ICT_OFFICER.toLowerCase()) return isSystemRequestType(requestType);
+  if (normalizedRole === TECHNICAL_OFFICER.toLowerCase()) return isHardwareRequestType(requestType);
+  return false;
+};
+
+const canHoldRequest = (roleName, status, requestType) =>
+  canImplementRequestType(roleName, requestType) &&
+  HOLDABLE_STATUSES.includes(String(status || '').toLowerCase());
+
+const canCloseRequest = (roleName, status, requestType) =>
+  canImplementRequestType(roleName, requestType) &&
+  CLOSEABLE_STATUSES.includes(String(status || '').toLowerCase());
+
+const implementorActionMessage = (requestType, action) =>
+  isSystemRequestType(requestType)
+    ? `Only an ICT Officer can ${action} a System/Software request`
+    : `Only a Technical Officer can ${action} an Infrastructure/hardware request`;
+
+const SUPERVISOR_REVIEWER_ROLES = ['Toll Supervisor', 'Toll Reviewer'];
+const SUPERVISOR_REVIEWER_LABEL = 'Toll Supervisor and Toll Reviewer';
+const ASSIGNABLE_STATUSES = ['opened', 'verified', 'reopened', 'on hold'];
+const VERIFIABLE_STATUSES = ['opened', 'reopened'];
+const CANCELABLE_STATUSES = ['opened', 'verified', 'assigned', 'reopened', 'on hold'];
+
+const hasSupervisorReviewerRole = (roleName) => {
+  const normalizedRole = String(roleName || '').trim().toLowerCase();
+  return SUPERVISOR_REVIEWER_ROLES.some((role) => role.toLowerCase() === normalizedRole);
+};
+
+const canAssignRequest = (roleName, status) =>
+  hasSupervisorReviewerRole(roleName) && ASSIGNABLE_STATUSES.includes(String(status || '').toLowerCase());
+
+const canVerifyRequest = (roleName, status) =>
+  hasSupervisorReviewerRole(roleName) && VERIFIABLE_STATUSES.includes(String(status || '').toLowerCase());
+
+const canCancelRequest = (roleName, status) =>
+  hasSupervisorReviewerRole(roleName) && CANCELABLE_STATUSES.includes(String(status || '').toLowerCase());
+
 const getStatusTag = (status) => {
   const normalized = String(status || '').toLowerCase();
   if (normalized === 'resolved') return <Tag color="green">Resolved</Tag>;
   if (normalized === 'assigned') return <Tag color="purple">Assigned</Tag>;
   if (normalized === 'verified') return <Tag color="cyan">Verified</Tag>;
+  if (normalized === 'on hold') return <Tag color="gold">On Hold</Tag>;
+  if (normalized === 'cancelled' || normalized === 'canceled') return <Tag color="red">Cancelled</Tag>;
   if (normalized === 'closed') return <Tag color="default">Closed</Tag>;
   if (normalized === 'reopened') return <Tag color="orange">Reopened</Tag>;
   if (normalized === 'opened') return <Tag color="blue">Opened</Tag>;
@@ -104,6 +159,7 @@ const isPdfType = (type = '', name = '') =>
 const AssignedRequests = () => {
   const { message } = App.useApp();
   const selectedRole = useSelector((state) => state.app.selectedRole);
+  const currentUser = useSelector((state) => state.auth.user);
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState(null);
@@ -113,6 +169,10 @@ const AssignedRequests = () => {
   const [total, setTotal] = useState(0);
   const [selectedCard, setSelectedCard] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [isCancelOpen, setIsCancelOpen] = useState(false);
+  const [cancelForm] = Form.useForm();
+  const [isHoldOpen, setIsHoldOpen] = useState(false);
+  const [holdForm] = Form.useForm();
 
   const visibleRequests = selectedCard
     ? requests.filter((request) => request.requestType === selectedCard.requestType)
@@ -121,7 +181,11 @@ const AssignedRequests = () => {
   const fetchRequests = async (nextPage = page, nextSize = pageSize, card = selectedCard) => {
     setLoading(true);
     try {
-      const stored = listSupportRequests();
+      const stored = listSupportRequests().map((request) => ({
+        ...request,
+        minutes: ensureSupportMinutes(request, getSupportUsername(currentUser) || request.requestedBy, selectedRole),
+      }));
+      saveSupportRequests(stored);
       const filtered = card
         ? stored.filter((request) => request.requestType === card.requestType)
         : [];
@@ -148,11 +212,19 @@ const AssignedRequests = () => {
 
   const openView = (record) => {
     setShowDocumentPreview(false);
-    setSelected(record);
+    const username = getSupportUsername(currentUser) || record?.requestedBy;
+    setSelected({
+      ...record,
+      minutes: ensureSupportMinutes(record, username, selectedRole),
+    });
   };
 
   const closeView = () => {
     setShowDocumentPreview(false);
+    setIsCancelOpen(false);
+    cancelForm.resetFields();
+    setIsHoldOpen(false);
+    holdForm.resetFields();
     setSelected(null);
   };
 
@@ -167,7 +239,11 @@ const AssignedRequests = () => {
   const applyUpdate = (id, patch, successMessage) => {
     setActionLoading(true);
     try {
-      const nextRequests = updateSupportRequest(id, patch);
+      const nextStatusValue = patch.status || selected?.status;
+      const nextRequests = updateSupportRequest(id, {
+        ...patch,
+        minutes: appendSupportMinute(selected, nextStatusValue, getSupportUsername(currentUser), selectedRole, patch.comment),
+      });
       setRequests(nextRequests);
       const updated = nextRequests.find((request) => String(request.id) === String(id));
       if (updated) setSelected(updated);
@@ -186,6 +262,10 @@ const AssignedRequests = () => {
 
   const handleVerify = () => {
     if (!selected) return;
+    if (!canVerifyRequest(selectedRole, selected.status)) {
+      message.error(`Only ${SUPERVISOR_REVIEWER_LABEL} can verify a request`);
+      return;
+    }
     applyUpdate(
       selected.id,
       {
@@ -199,6 +279,10 @@ const AssignedRequests = () => {
 
   const handleAssign = (implementor) => {
     if (!selected || !implementor) return;
+    if (!canAssignRequest(selectedRole, selected.status)) {
+      message.error(`Only ${SUPERVISOR_REVIEWER_LABEL} can assign a request`);
+      return;
+    }
     const now = new Date().toISOString();
     applyUpdate(
       selected.id,
@@ -214,8 +298,115 @@ const AssignedRequests = () => {
     );
   };
 
-  const isAssigned = String(selected?.status || '') === 'Assigned';
-  const isVerified = String(selected?.status || '').toLowerCase() === 'verified';
+  const openHold = () => {
+    if (!selected) return;
+    if (!canHoldRequest(selectedRole, selected.status, selected.requestType)) {
+      message.error(implementorActionMessage(selected.requestType, 'place on hold'));
+      return;
+    }
+    holdForm.resetFields();
+    setIsHoldOpen(true);
+  };
+
+  const closeHold = () => {
+    setIsHoldOpen(false);
+    holdForm.resetFields();
+  };
+
+  const handleHold = async () => {
+    if (!selected) return;
+    if (!canHoldRequest(selectedRole, selected.status, selected.requestType)) {
+      message.error(implementorActionMessage(selected.requestType, 'place on hold'));
+      return;
+    }
+    try {
+      const values = await holdForm.validateFields();
+      const comment = String(values.comment || '').trim();
+      if (!comment) {
+        message.error('A comment is required to place a request on hold');
+        return;
+      }
+      applyUpdate(
+        selected.id,
+        {
+          status: 'On Hold',
+          on_hold_at: new Date().toISOString(),
+          on_hold_by: selectedRole,
+          hold_comment: comment,
+          comment,
+        },
+        'Request placed on hold'
+      );
+      closeHold();
+    } catch (error) {
+      if (error?.errorFields) return;
+      message.error(error?.message || 'Unable to place the request on hold');
+    }
+  };
+
+  const handleCloseRequest = () => {
+    if (!selected) return;
+    if (!canCloseRequest(selectedRole, selected.status, selected.requestType)) {
+      message.error(implementorActionMessage(selected.requestType, 'close'));
+      return;
+    }
+    applyUpdate(
+      selected.id,
+      {
+        status: 'Closed',
+        closed_at: new Date().toISOString(),
+        closed_by: selectedRole,
+      },
+      'Request closed'
+    );
+  };
+
+  const openCancel = () => {
+    if (!selected) return;
+    if (!canCancelRequest(selectedRole, selected.status)) {
+      message.error(`Only ${SUPERVISOR_REVIEWER_LABEL} can cancel a request`);
+      return;
+    }
+    cancelForm.resetFields();
+    setIsCancelOpen(true);
+  };
+
+  const closeCancel = () => {
+    setIsCancelOpen(false);
+    cancelForm.resetFields();
+  };
+
+  const handleCancelRequest = async () => {
+    if (!selected) return;
+    if (!canCancelRequest(selectedRole, selected.status)) {
+      message.error(`Only ${SUPERVISOR_REVIEWER_LABEL} can cancel a request`);
+      return;
+    }
+    try {
+      const values = await cancelForm.validateFields();
+      const comment = String(values.comment || '').trim();
+      if (!comment) {
+        message.error('A comment is required to cancel a request');
+        return;
+      }
+      applyUpdate(
+        selected.id,
+        {
+          status: 'Cancelled',
+          cancelled_at: new Date().toISOString(),
+          cancelled_by: selectedRole,
+          cancel_comment: comment,
+          comment,
+        },
+        'Request cancelled'
+      );
+      closeCancel();
+    } catch (error) {
+      if (error?.errorFields) return;
+      message.error(error?.message || 'Unable to cancel the request');
+    }
+  };
+
   const isHardwareRequest = selected?.requestType === INFRASTRUCTURE_REQUEST_TYPE;
   const isSystemRequest = selected?.requestType === SYSTEM_REQUEST_TYPE;
 
@@ -363,14 +554,15 @@ const AssignedRequests = () => {
         closable={false}
         maskClosable={false}
         keyboard={false}
-        width={720}
+        width={980}
         className="brand-modal"
         styles={{ body: { padding: 0 }, content: { padding: 0, overflow: 'hidden' } }}
       >
-        <BrandModalHeader title="Assign Requests" onClose={closeView} />
+        <BrandModalHeader title="Assign Details" onClose={closeView} />
         {selected && (
           <div className="flex max-h-[85vh] flex-col">
-            <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
+            <div className="grid min-h-0 flex-1 grid-cols-1 overflow-hidden sm:grid-cols-[minmax(0,1fr)_280px]">
+            <div className="min-h-0 overflow-y-auto px-6 py-5">
               <div className="mb-5 rounded-md border border-[#ead6d7] bg-[#fff8f8] px-4 py-3">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
@@ -449,44 +641,169 @@ const AssignedRequests = () => {
                 </div>
               </Section>
             </div>
+              <SupportRequestMinutes
+                minutes={selected.minutes}
+                requestNumber={selected.request_no || selected.id}
+                currentStatus={selected.status}
+                username={getSupportUsername(currentUser) || selected.requestedBy}
+                roleName={selectedRole}
+              />
+            </div>
             <div className="flex flex-wrap items-center justify-end gap-2 border-t border-slate-200 bg-white px-6 py-3">
               <Button onClick={closeView}>Close</Button>
-              {!isAssigned ? (
-                <>
-                  <Button
-                    type="primary"
-                    loading={actionLoading}
-                    disabled={isVerified}
-                    className="btn-standard-primary"
-                    onClick={handleVerify}
-                  >
-                    Verify
-                  </Button>
-                  {isSystemRequest ? (
-                    <Button
-                      type="primary"
-                      loading={actionLoading}
-                      className="btn-standard-primary"
-                      onClick={() => handleAssign(ICT_OFFICER)}
-                    >
-                      Assign to ICT Officer
-                    </Button>
-                  ) : null}
-                  {isHardwareRequest ? (
-                    <Button
-                      type="primary"
-                      loading={actionLoading}
-                      className="btn-standard-primary"
-                      onClick={() => handleAssign(TECHNICAL_OFFICER)}
-                    >
-                      Assign to Technical Officer
-                    </Button>
-                  ) : null}
-                </>
+              {canHoldRequest(selectedRole, selected.status, selected.requestType) ? (
+                <Button
+                  loading={actionLoading}
+                  onClick={openHold}
+                >
+                  On Hold
+                </Button>
+              ) : null}
+              {canCloseRequest(selectedRole, selected.status, selected.requestType) ? (
+                <Button
+                  type="primary"
+                  loading={actionLoading}
+                  className="btn-standard-primary"
+                  onClick={handleCloseRequest}
+                >
+                  Close Request
+                </Button>
+              ) : null}
+              {canCancelRequest(selectedRole, selected.status) ? (
+                <Button
+                  danger
+                  loading={actionLoading}
+                  onClick={openCancel}
+                >
+                  Cancel Request
+                </Button>
+              ) : null}
+              {canVerifyRequest(selectedRole, selected.status) ? (
+                <Button
+                  type="primary"
+                  loading={actionLoading}
+                  className="btn-standard-primary"
+                  onClick={handleVerify}
+                >
+                  Verify
+                </Button>
+              ) : null}
+              {canAssignRequest(selectedRole, selected.status) && isSystemRequest ? (
+                <Button
+                  type="primary"
+                  loading={actionLoading}
+                  className="btn-standard-primary"
+                  onClick={() => handleAssign(ICT_OFFICER)}
+                >
+                  Assign to ICT Officer
+                </Button>
+              ) : null}
+              {canAssignRequest(selectedRole, selected.status) && isHardwareRequest ? (
+                <Button
+                  type="primary"
+                  loading={actionLoading}
+                  className="btn-standard-primary"
+                  onClick={() => handleAssign(TECHNICAL_OFFICER)}
+                >
+                  Assign to Technical Officer
+                </Button>
               ) : null}
             </div>
           </div>
         )}
+      </Modal>
+
+      <Modal
+        open={isHoldOpen}
+        footer={null}
+        centered
+        destroyOnClose
+        title={null}
+        closable={false}
+        maskClosable={false}
+        keyboard={false}
+        zIndex={1100}
+        width={480}
+        className="brand-modal"
+        styles={{ body: { padding: 0 }, content: { padding: 0, overflow: 'hidden' } }}
+      >
+        <BrandModalHeader title="On Hold" onClose={closeHold} />
+        <div className="px-6 py-5">
+          <p className="mb-3 text-sm text-slate-600">
+            Add a comment to place this request on hold.
+          </p>
+          <Form form={holdForm} layout="vertical" requiredMark={false}>
+            <Form.Item
+              name="comment"
+              label="Comment"
+              rules={[{ required: true, whitespace: true, message: 'Comment is required to place a request on hold' }]}
+            >
+              <Input.TextArea
+                rows={4}
+                maxLength={500}
+                showCount
+                placeholder="Enter the reason for placing this request on hold"
+              />
+            </Form.Item>
+          </Form>
+        </div>
+        <div className="flex items-center justify-end gap-2 border-t border-slate-200 bg-white px-6 py-3">
+          <Button onClick={closeHold}>Back</Button>
+          <Button
+            type="primary"
+            loading={actionLoading}
+            className="btn-standard-primary"
+            onClick={handleHold}
+          >
+            On Hold
+          </Button>
+        </div>
+      </Modal>
+
+      <Modal
+        open={isCancelOpen}
+        footer={null}
+        centered
+        destroyOnClose
+        title={null}
+        closable={false}
+        maskClosable={false}
+        keyboard={false}
+        zIndex={1100}
+        width={480}
+        className="brand-modal"
+        styles={{ body: { padding: 0 }, content: { padding: 0, overflow: 'hidden' } }}
+      >
+        <BrandModalHeader title="Cancel Request" onClose={closeCancel} />
+        <div className="px-6 py-5">
+          <p className="mb-3 text-sm text-slate-600">
+            Add a comment to cancel this request.
+          </p>
+          <Form form={cancelForm} layout="vertical" requiredMark={false}>
+            <Form.Item
+              name="comment"
+              label="Comment"
+              rules={[{ required: true, whitespace: true, message: 'Comment is required to cancel a request' }]}
+            >
+              <Input.TextArea
+                rows={4}
+                maxLength={500}
+                showCount
+                placeholder="Enter the reason for cancelling this request"
+              />
+            </Form.Item>
+          </Form>
+        </div>
+        <div className="flex items-center justify-end gap-2 border-t border-slate-200 bg-white px-6 py-3">
+          <Button onClick={closeCancel}>Back</Button>
+          <Button
+            danger
+            loading={actionLoading}
+            onClick={handleCancelRequest}
+          >
+            Cancel Request
+          </Button>
+        </div>
       </Modal>
 
       <Modal

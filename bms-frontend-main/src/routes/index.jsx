@@ -68,6 +68,9 @@ import LeaveApplication from '../pages/LeaveManagement/LeaveApplication.jsx';
 import LeaveBalance from '../pages/LeaveManagement/LeaveBalance.jsx';
 import LeaveReports from '../pages/LeaveManagement/LeaveReports.jsx';
 import ManageRequests from '../pages/SupportManagement/ManageRequests.jsx';
+import ManageAccountRequests from '../pages/AdminManagement/ManageAccountRequests.jsx';
+import AccountReports from '../pages/AdminManagement/AccountReports.jsx';
+import ReviewRoles from '../pages/AdminManagement/ReviewRoles.jsx';
 import AssignedRequests from '../pages/SupportManagement/AssignedRequests.jsx';
 import RequestReports from '../pages/SupportManagement/RequestReports.jsx';
 
@@ -469,6 +472,36 @@ export default function AppRoutes() {
           <ProtectedRoute>
             <Layout>
               <ManageUsers />
+            </Layout>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/admin-management/account-requests',
+        element: (
+          <ProtectedRoute>
+            <Layout>
+              <ManageAccountRequests />
+            </Layout>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/admin-management/account-reports',
+        element: (
+          <ProtectedRoute>
+            <Layout>
+              <AccountReports />
+            </Layout>
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/admin-management/review-roles',
+        element: (
+          <ProtectedRoute>
+            <Layout>
+              <ReviewRoles />
             </Layout>
           </ProtectedRoute>
         )
